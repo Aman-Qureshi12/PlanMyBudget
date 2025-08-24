@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 const SideBar = () => {
   return (
@@ -6,11 +7,11 @@ const SideBar = () => {
       <div className="">
         <h1 className="text-center text-2xl ">Dashboard</h1>
         <div className="flex flex-col gap-10 text-lg pt-16">
-          <p>Overview</p>
-          <p>Expenses</p>
-          <p>Investments</p>
-          <p>Insurances</p>
-          <p>Logout</p>
+          <NavLink to="/overview">Overview</NavLink>
+          <NavLink to="/expenses">Expenses</NavLink>
+          <NavLink to="/investments">Investments</NavLink>
+          <NavLink to="/insurances">Insurances</NavLink>
+          {/* <NavLink to=''>Logout</NavLink> */}
         </div>
       </div>
       <div className="pb-8 flex justify-between items-center">

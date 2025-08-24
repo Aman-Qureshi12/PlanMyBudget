@@ -1,11 +1,9 @@
-import SideBar from "./Layout/SideBar";
-import Overview from "./Pages/Overview";
+import Router from "./Routers/Router";
 
 function App() {
   return (
-    <div className="flex gap-10">
-      <SideBar />
-      <Overview />
+    <div>
+      <Router />
     </div>
   );
 }
