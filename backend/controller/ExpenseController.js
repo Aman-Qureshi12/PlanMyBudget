@@ -30,3 +30,12 @@ export const getExpensesTotal = async (req, res) => {
     console.log("There was an error getting the total", error);
   }
 };
+
+export const getAllExpenses = async (req, res) => {
+  try {
+    const allExpenses = await ExpenseModel.find();
+    res.status(201).json({ allExpenses });
+  } catch (error) {
+    console.log("There was an error getting the expenses ", error);
+  }
+};

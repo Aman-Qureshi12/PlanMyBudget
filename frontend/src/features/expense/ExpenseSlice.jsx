@@ -18,6 +18,14 @@ export const fetchExpenseTotal = createAsyncThunk(
   }
 );
 
+export const fetchingAllExpenses = createAsyncThunk(
+  "fetchingAllExpenses",
+  async () => {
+    const response = await axios.get("http://localhost:8000/expenses");
+    return response.data.allExpenses;
+  }
+);
+
 const expenseSlice = createSlice({
   name: "expense",
   initialState,
@@ -33,6 +41,18 @@ const expenseSlice = createSlice({
       .addCase(fetchExpenseTotal.rejected, (state, action) => {
         console.log("Error", action.payload);
         state.isError = true;
+      });
+
+    builder
+      .addCase(fetchingAllExpenses.fulfilled, (state, action) => {
+        (state.isLoading = false), (state.expenses = action.payload);
+      })
+      .addCase(fetchingAllExpenses.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchingAllExpenses.rejected, (state, action) => {
+        state.isError = true;
+        console.log("There was an error ", action.payload);
       });
   },
 });
