@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import { ConnectDB } from "./db.js";
 import ExpenseRoutes from "./Routes/ExpenseRoute.js";
+import IncomeRoutes from "./Routes/IncomeRoute.js";
+import InvestmentRoutes from "./Routes/InvestmentRoute.js";
 
 const PORT = 8000;
 
@@ -11,6 +13,8 @@ ConnectDB();
 app.use(cors({ origin: "http://localhost:5173" }));
 
 app.use("/", ExpenseRoutes);
+app.use("/", IncomeRoutes);
+app.use("/", InvestmentRoutes);
 
 // app.post("/overview", (req, res) => {
 //   const { date, expense } = req.body;

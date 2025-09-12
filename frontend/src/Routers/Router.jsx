@@ -6,6 +6,7 @@ import Investments from "../Pages/Investments";
 import { Route, Routes } from "react-router-dom";
 import IncomeForm from "../Pages/forms/IncomeForm";
 import ExpenseForm from "../Pages/forms/ExpenseForm";
+import Income from "../Pages/Income";
 
 function Router() {
   return (
@@ -15,6 +16,7 @@ function Router() {
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/investments" element={<Investments />} />
         <Route path="/insurances" element={<Insurances />} />
+        <Route path="/incomes" element={<Income />} />
       </Route>
       <Route path="/incomeForm" element={<IncomeForm />} />
       <Route path="/addExpense" element={<ExpenseForm />} />
