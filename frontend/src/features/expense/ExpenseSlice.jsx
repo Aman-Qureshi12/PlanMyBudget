@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const initialState = {
+  currentMonthExpense: 0,
   expenses: null,
   totalExpense: null,
   isLoading: false,
@@ -22,13 +23,31 @@ export const fetchingAllExpenses = createAsyncThunk(
   "fetchingAllExpenses",
   async () => {
     const response = await axios.get("http://localhost:8000/expenses");
-    return response.data.allExpenses;
+
+    // Format each expense date to YYYY-MM-DD
+    const formattedExpenses = response.data.allExpenses.map((expense) => ({
+      ...expense,
+      date: expense.date.slice(0, 10), // "2025-08-17T00:00:00.000Z" -> "2025-08-17"
+    }));
+
+    return formattedExpenses;
   }
 );
 
 const expenseSlice = createSlice({
   name: "expense",
   initialState,
+  reducers: {
+    currentMonthExpense: (state) => {
+      const currentMonth = new Date().getMonth() + 1;
+
+      const thisMonthTotal = (state.expenses ?? [])
+        .filter((exp) => new Date(exp.date).getMonth() + 1 === currentMonth)
+        .reduce((sum, exp) => sum + (Number(exp.expenseAmount) || 0), 0);
+
+      state.currentMonthExpense = thisMonthTotal;
+    },
+  },
   // extraReducers are basically a function in which we have a builder
   extraReducers: (builder) => {
     builder
@@ -57,6 +76,6 @@ const expenseSlice = createSlice({
   },
 });
 
-export const { addExpense } = expenseSlice.actions;
+export const { addExpense, currentMonthExpense } = expenseSlice.actions;
 
 export default expenseSlice.reducer;

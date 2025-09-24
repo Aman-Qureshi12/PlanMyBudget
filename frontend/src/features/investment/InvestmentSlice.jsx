@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const initialState = {
+  currentMonthInvestment: 0,
   investmentDetails: null,
   isError: false,
   isLoading: false,
@@ -12,7 +13,13 @@ export const fetchInvestmentDetails = createAsyncThunk(
   "fetchInvestmentDetails",
   async () => {
     const response = await axios.get("http://localhost:8000/investments");
-    return response.data.investments;
+    const formattedInvestments = response.data.investments.map(
+      (investment) => ({
+        ...investment,
+        date: investment.date.slice(0, 10), // "2025-08-17T00:00:00.000Z" -> "2025-08-17"
+      })
+    );
+    return formattedInvestments;
   }
 );
 
@@ -27,6 +34,21 @@ export const fetchInvestmentTotal = createAsyncThunk(
 export const investmentSlice = createSlice({
   name: "investment",
   initialState,
+  reducers: {
+    currentMonthInvestment: (state) => {
+      const currentMonth = new Date().getMonth() + 1;
+      const thisMonth = (state.investmentDetails ?? [])
+        ?.filter(
+          (invest) => new Date(invest.date).getMonth() + 1 == currentMonth
+        )
+        .reduce(
+          (sum, invest) => sum + (Number(invest.investmentAmount) || 0),
+          0
+        );
+
+      state.currentMonthInvestment = thisMonth;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchInvestmentDetails.pending, (state, action) => {
@@ -51,5 +73,7 @@ export const investmentSlice = createSlice({
       });
   },
 });
+
+export const { currentMonthInvestment } = investmentSlice.actions;
 
 export default investmentSlice.reducer;

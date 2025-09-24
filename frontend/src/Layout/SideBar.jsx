@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 
 const SideBar = () => {
   return (
-    <div className=" w-[25%] h-[100vh] flex flex-col justify-between bg-richBlack  text-textColor pt-14 px-10 font-roboto">
+    <div className="fixed w-[20%] h-[100vh] flex flex-col justify-between bg-richBlack  text-textColor pt-14 px-10 font-roboto">
       <div className="">
         <h1 className="text-center text-2xl ">Dashboard</h1>
         <div className="flex flex-col gap-10 text-lg pt-16">
