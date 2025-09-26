@@ -2,7 +2,7 @@ import Router from "./Routers/Router";
 
 function App() {
   return (
-    <div>
+    <div className="bg-richBlack">
       <Router />
     </div>
   );

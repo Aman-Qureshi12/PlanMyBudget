@@ -1,12 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo } from "react";
-import { Line } from "react-chartjs-2";
+import { Bar, Line } from "react-chartjs-2";
 import {
   Chart,
   CategoryScale,
   LinearScale,
-  LineElement,
-  PointElement,
+  BarElement,
+  // PointElement,
   Title,
   Legend,
   Tooltip,
@@ -16,8 +16,8 @@ import { fetchInvestmentDetails } from "../../features/investment/InvestmentSlic
 Chart.register(
   CategoryScale,
   LinearScale,
-  LineElement,
-  PointElement,
+  BarElement,
+  // PointElement,
   Title,
   Legend,
   Tooltip
@@ -59,16 +59,45 @@ const InvestmentChart = () => {
       {
         label: "Monthly Investment",
         data: monthlyData,
-        borderColor: "rgb(75, 192, 192)",
-        backgroundColor: "rgba(75, 192, 192, 0.3)",
+        borderColor: "#b892ff",
+        backgroundColor: "#b892ff",
         tension: 0.3,
       },
     ],
   };
-  const options = {};
+  const options = {
+    plugins: {
+      legend: {
+        labels: {
+          color: "#b892ff", // legend text color
+          font: {
+            size: 14,
+          },
+        },
+      },
+      tooltip: {
+        bodyColor: "#b892ff",
+        titleColor: "#b892ff",
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: "#b892ff",
+        },
+      },
+      y: {
+        ticks: {
+          color: "#b892ff",
+        },
+      },
+    },
+  };
+
   return (
-    <div className="pt-10 w-full">
-      <Line options={options} data={chartData} />
+    <div className="pt-10 w-full border-2 border-Purple px-4 py-4 rounded-sm">
+      {/* <Line options={options} data={chartData} /> */}
+      <Bar options={options} data={chartData} />
     </div>
   );
 };

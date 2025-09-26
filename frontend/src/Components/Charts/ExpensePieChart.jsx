@@ -3,6 +3,8 @@ import { Chart, Legend, Tooltip, ArcElement } from "chart.js";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { fetchingAllExpenses } from "../../features/expense/ExpenseSlice";
+import { scaleOrdinal } from "d3-scale";
+import { schemeSet3 } from "d3-scale-chromatic";
 
 Chart.register(Tooltip, Legend, ArcElement);
 
@@ -33,25 +35,40 @@ const ExpensePieChart = () => {
   const labels = Object.keys(categoryTotal);
   const data = Object.values(categoryTotal);
 
+  const colorScale = scaleOrdinal(schemeSet3);
+
+  const backgroundColors = labels.map((_, index) => colorScale(index));
+
   const pieChartData = {
-    labels: labels,
+    labels,
     datasets: [
       {
         label: "Money Spent",
-        data: data,
-        backgroundColor: [
-          "rgba(159, 12, 44, 0.2)",
-          "rgba(0, 57, 95, 0.2)",
-          "rgba(155, 111, 0, 0.2)",
-          "rgba(10, 83, 83, 0.2)",
-          "rgba(39, 9, 100, 0.2)",
-        ],
+        data,
+        backgroundColor: backgroundColors,
         hoverOffset: 4,
       },
     ],
   };
 
-  const options = {};
+  const options = {
+    plugins: {
+      legend: {
+        labels: {
+          color: " #ead7d7", // 👈 legend text color
+          font: {
+            size: 14,
+            // weight: "bold",
+          },
+        },
+      },
+      tooltip: {
+        bodyColor: " #ead7d7", // 👈 tooltip text color
+        titleColor: "#ead7d7", // 👈 tooltip title color
+      },
+    },
+  };
+
   return (
     <div className="pt-10 w-[50%] h-[400px]">
       <Pie options={options} data={pieChartData} />

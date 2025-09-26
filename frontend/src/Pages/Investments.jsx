@@ -5,6 +5,7 @@ import { fetchInvestmentDetails } from "../features/investment/InvestmentSlice";
 import InvestmentCard from "../Components/Cards/InvestmentCard";
 import InvestmentChart from "../Components/Charts/InvestmentChart";
 import InvestmentPieChart from "../Components/Charts/InvestmentPieChart";
+import CurrentBalanceCard from "../Components/Cards/CurrentBalanceCard";
 
 const Investments = () => {
   const [filterByDate, setFilterByDate] = useState("");
@@ -75,64 +76,99 @@ const Investments = () => {
     });
 
   return (
-    <div className="pl-[22%] w-full py-20 pr-10">
-      <InvestmentCard />
+    <div className="pl-[22%] w-full py-20 pr-10 font-roboto text-Purple">
+      <div className="w-full flex gap-10 items-center">
+        <InvestmentCard />
+        <CurrentBalanceCard />
+      </div>
+
       <InvestmentForm />
       <div className="w-full flex justify-between items-center">
         <InvestmentChart />
         <InvestmentPieChart />
       </div>
       <div className="pt-10">
-        <div className="flex justify-between">
-          <h1>All Investments </h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-inter">All Investments </h1>
           <div className="flex gap-10">
             {/* Filter by date  */}
             <div>
               <select
                 onChange={handleFilterByDate}
-                className="border-2 border-black rounded-sm px-4 py-2"
+                className="border-2 border-Purple rounded-sm px-4 py-2"
               >
                 <option value="" disabled selected>
                   Filter By Date
                 </option>
-                <option value="Ascending">Ascending</option>
-                <option value="Descending">Descending</option>
+                <option className="text-richBlack" value="Ascending">
+                  Ascending
+                </option>
+                <option className="text-richBlack" value="Descending">
+                  Descending
+                </option>
               </select>
             </div>
             {/* filter By month*/}
             <div>
               <select
                 onChange={handleFilterByMonth}
-                className="border-2 border-black rounded-sm px-4 py-2"
+                className="border-2 border-Purple rounded-sm px-4 py-2"
               >
                 <option value="" disabled selected>
                   Filter By Months
                 </option>
-                <option value="1">Jan</option>
-                <option value="2">Feb</option>
-                <option value="3">Mar</option>
-                <option value="4">Apr</option>
-                <option value="5">May</option>
-                <option value="6">Jun</option>
-                <option value="7">Jul</option>
-                <option value="8">Aug</option>
-                <option value="9">Sep</option>
-                <option value="10">Oct</option>
-                <option value="11">Nov</option>
-                <option value="12">Dec</option>
+                <option className="text-richBlack" value="1">
+                  Jan
+                </option>
+                <option className="text-richBlack" value="2">
+                  Feb
+                </option>
+                <option className="text-richBlack" value="3">
+                  Mar
+                </option>
+                <option className="text-richBlack" value="4">
+                  Apr
+                </option>
+                <option className="text-richBlack" value="5">
+                  May
+                </option>
+                <option className="text-richBlack" value="6">
+                  Jun
+                </option>
+                <option className="text-richBlack" value="7">
+                  Jul
+                </option>
+                <option className="text-richBlack" value="8">
+                  Aug
+                </option>
+                <option className="text-richBlack" value="9">
+                  Sep
+                </option>
+                <option className="text-richBlack" value="10">
+                  Oct
+                </option>
+                <option className="text-richBlack" value="11">
+                  Nov
+                </option>
+                <option className="text-richBlack" value="12">
+                  Dec
+                </option>
               </select>
             </div>
             {/* Filter By category  */}
             <div>
               <select
                 onChange={handleFilterByCategory}
-                className="border-2 border-black rounded-sm px-4 py-2"
+                className="border-2 border-Purple rounded-sm px-4 py-2"
               >
                 <option value="" disabled selected>
                   Filter By Category
                 </option>
                 {filterCategories?.map((investment) => (
-                  <option value={investment.category}>
+                  <option
+                    className="text-richBlack"
+                    value={investment.category}
+                  >
                     {investment.category}
                   </option>
                 ))}
@@ -143,7 +179,7 @@ const Investments = () => {
         {isLoading ? (
           "Loading ...."
         ) : (
-          <table className=" w-full mt-8">
+          <table className=" w-full mt-8 text-lg">
             <tbody>
               {filteredAndSortedInvestments ? (
                 <>

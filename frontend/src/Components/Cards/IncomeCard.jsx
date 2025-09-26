@@ -13,15 +13,18 @@ const IncomeCard = () => {
     dispatch(fetchingIncome());
   }, [dispatch]);
   return (
-    <div className="px-4 py-2 bg-black text-white w-full rounded-sm ">
+    <div className="px-4 py-2 bg-skyBlue text-richBlack w-full rounded-sm ">
       <div>
         {isIncomeLoading ? (
           "Loading"
         ) : (
           <p className="flex flex-col">
-            <span className="text-2xl">Annual Income</span>
-            <span className="font-bold text-2xl pt-3"> {annualIncome}</span>
-            <span className="pt-5 text-end">
+            <span className="text-2xl font-inter">Annual Income</span>
+            <span className="font-bold text-2xl pt-3 font-inter">
+              {" "}
+              {annualIncome}
+            </span>
+            <span className="pt-5 text-end font-roboto">
               Monthly Income {monthlyIncome}
             </span>
           </p>

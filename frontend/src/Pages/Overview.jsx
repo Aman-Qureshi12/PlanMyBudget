@@ -32,13 +32,15 @@ const Overview = () => {
         <InvestmentCard />
         <ExpenseCard />
       </div>
-      <div className="w-full flex gap-10">
+      <div className="w-full flex gap-10 pt-10">
         <ExpenseChart />
         <InvestmentChart />
       </div>
       <div className="w-full pt-10">
-        <h1 className="text-xl">Recent Added Expense</h1>
-        <table className=" w-full mt-10">
+        <h1 className="text-xl text-palePink font-inter">
+          Recent Added Expense
+        </h1>
+        <table className=" w-full mt-10 text-palePink font-roboto text-lg">
           <tbody>
             {lastFiveExpenses?.map((expense, index) => (
               <tr key={index}>

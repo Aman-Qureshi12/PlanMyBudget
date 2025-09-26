@@ -21,15 +21,18 @@ const ExpenseCard = () => {
     });
   }, [dispatch]);
   return (
-    <div className="px-4 py-2 bg-black text-white w-full rounded-sm">
+    <div className="px-4 py-2 bg-palePink text-richBlack w-full rounded-sm">
       <div>
         {isLoading ? (
           "Loading"
         ) : (
           <p className="flex flex-col">
-            <span className="text-2xl">Total Expense</span>
-            <span className="font-bold text-2xl pt-3"> {totalExpense}</span>
-            <span className="pt-5 text-end">
+            <span className="text-2xl font-inter">Total Expense</span>
+            <span className="font-bold text-2xl pt-3 font-inter">
+              {" "}
+              {totalExpense}
+            </span>
+            <span className="pt-5 text-end font-roboto">
               Current Month Expense {thisMonth}
             </span>
           </p>

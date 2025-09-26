@@ -79,12 +79,12 @@ const InvestmentForm = () => {
   };
 
   return (
-    <div className="w-full pr-10 py-20">
+    <div className="w-full pr-10 py-20 text-Purple">
       <div className="w-full flex justify-center">
         <button
           ref={buttonRef}
           onClick={handleShowForm}
-          className="text-lg font-Inter bg-black text-white px-4 py-2 rounded-sm w-[60%] cursor-pointer"
+          className="text-lg font-Inter bg-Purple text-richBlack px-4 py-2 rounded-sm w-[60%] cursor-pointer"
         >
           Add Investment +
         </button>
@@ -98,7 +98,7 @@ const InvestmentForm = () => {
           >
             <div>
               <input
-                className="px-4 py-2 rounded-sm border-2 border-black"
+                className="px-4 py-2 rounded-sm border-2 border-Purple"
                 type="date"
                 {...register("date")}
               />
@@ -108,14 +108,14 @@ const InvestmentForm = () => {
               <input
                 type="text"
                 placeholder="purpose"
-                className="px-4 py-2 rounded-sm border-2 border-black"
+                className="px-4 py-2 rounded-sm border-2 border-Purple"
                 {...register("purpose")}
               />
               {errors.purpose && <p>{errors.purpose.message}</p>}
             </div>
             <div>
               <input
-                className="px-4 py-2 rounded-sm border-2 border-black"
+                className="px-4 py-2 rounded-sm border-2 border-Purple"
                 type="number"
                 placeholder="enter the Amount"
                 {...register("investmentAmount")}
@@ -126,7 +126,7 @@ const InvestmentForm = () => {
             </div>
             <div>
               <input
-                className="px-4 py-2 rounded-sm border-2 border-black"
+                className="px-4 py-2 rounded-sm border-2 border-Purple"
                 type="text"
                 placeholder="Category"
                 {...register("category")}
@@ -136,11 +136,11 @@ const InvestmentForm = () => {
             <div className="flex gap-6">
               <button
                 onClick={handleInvestmentFormCancelling}
-                className="text-base px-4 py-2 bg-black text-white rounded-sm cursor-pointer"
+                className="text-base px-4 py-2 bg-Purple text-richBlack rounded-sm cursor-pointer"
               >
                 Cancel
               </button>
-              <button className="text-base px-4 py-2 bg-black text-white rounded-sm cursor-pointer">
+              <button className="text-base px-4 py-2 bg-Purple text-richBlack rounded-sm cursor-pointer">
                 Submit
               </button>
             </div>

@@ -1,13 +1,13 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo } from "react";
 import { fetchingAllExpenses } from "../../features/expense/ExpenseSlice";
-import { Line } from "react-chartjs-2";
+import { Bar, Line } from "react-chartjs-2";
 import {
   Chart,
   CategoryScale,
   LinearScale,
-  LineElement,
-  PointElement,
+  BarElement, // change it to LineElement for Line Chart
+  // PointElement,
   Title,
   Legend,
   Tooltip,
@@ -16,8 +16,8 @@ import {
 Chart.register(
   CategoryScale,
   LinearScale,
-  LineElement,
-  PointElement,
+  BarElement, // change it to LineElement for Line Chart
+  // PointElement,
   Title,
   Legend,
   Tooltip
@@ -62,16 +62,44 @@ const ExpenseChart = () => {
       {
         label: "Monthly Expense",
         data: monthlyData,
-        borderColor: "rgb(75, 192, 192)",
-        backgroundColor: "rgba(75, 192, 192, 0.3)",
-        tension: 0.3,
+        borderColor: "#ead7d7",
+        backgroundColor: "#ead7d7",
+        // tension: 0.3,
       },
     ],
   };
-  const options = {};
+  const options = {
+    plugins: {
+      legend: {
+        labels: {
+          color: "#ead7d7", // legend text color
+          font: {
+            size: 14,
+          },
+        },
+      },
+      tooltip: {
+        bodyColor: "#ead7d7",
+        titleColor: "#ead7d7",
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: "#ead7d7",
+        },
+      },
+      y: {
+        ticks: {
+          color: "#ead7d7",
+        },
+      },
+    },
+  };
   return (
-    <div className="pt-10 w-full">
-      <Line options={options} data={chartData} />
+    <div className="pt-10 w-full border-2 border-palePink px-4 py-4 rounded-sm">
+      {/* <Line options={options} data={chartData} /> */}
+      <Bar options={options} data={chartData} />
     </div>
   );
 };

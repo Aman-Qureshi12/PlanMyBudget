@@ -44,15 +44,18 @@ const CurrentBalanceCard = () => {
   }, [dispatch]);
 
   return (
-    <div className="px-4 py-2 bg-black text-white w-full rounded-sm">
+    <div className="px-4 py-2 bg-yellowGreen text-richBlack w-full rounded-sm">
       <div>
         {isLoading ? (
           "Loading"
         ) : (
           <p className="flex flex-col">
-            <span className="text-2xl">Current Balance</span>
-            <span className="font-bold text-2xl pt-3"> {CurrentBalance}</span>
-            <span className="pt-5 text-end">
+            <span className="text-2xl font-inter">Current Balance</span>
+            <span className="font-bold text-2xl pt-3 font-inter">
+              {" "}
+              {CurrentBalance}
+            </span>
+            <span className="pt-5 text-end font-roboto">
               Current Month Balance {currentMonthBalance}
             </span>
           </p>

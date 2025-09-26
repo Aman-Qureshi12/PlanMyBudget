@@ -7,10 +7,12 @@ import { Route, Routes } from "react-router-dom";
 import IncomeForm from "../Pages/forms/IncomeForm";
 import ExpenseForm from "../Pages/forms/ExpenseForm";
 import Income from "../Pages/Income";
+import LandingPage from "../Pages/LandingPage";
 
 function Router() {
   return (
     <Routes>
+      <Route path="/" index element={<LandingPage />} />
       <Route element={<Layout />}>
         <Route path="/overview" element={<Overview />} />
         <Route path="/expenses" element={<Expenses />} />
