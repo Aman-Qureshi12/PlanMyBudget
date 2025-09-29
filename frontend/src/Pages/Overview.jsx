@@ -7,6 +7,8 @@ import ExpenseChart from "../Components/Charts/ExpenseChart";
 import InvestmentChart from "../Components/Charts/InvestmentChart";
 import { useEffect } from "react";
 import { fetchingAllExpenses } from "../features/expense/ExpenseSlice";
+import Modal from "../Components/Modal";
+import Popup from "../Components/Popup";
 
 const Overview = () => {
   const dispatch = useDispatch();
@@ -53,6 +55,8 @@ const Overview = () => {
           </tbody>
         </table>
       </div>
+      <Modal Message="Added successfully" bgColor="palePink" />
+      <Popup Message="Are you sure? you want to delete it" bgColor="palePink" />
     </div>
   );
 };

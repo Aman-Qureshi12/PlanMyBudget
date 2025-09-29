@@ -1,7 +1,24 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const SideBar = () => {
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        "http://localhost:8000/logout",
+        {},
+        { withCredentials: true }
+      );
+
+      // Redirect to login page
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <div className="fixed w-[20%] h-[100vh] flex flex-col justify-between bg-richBlack  text-textColor pt-14 px-10 font-roboto">
       <div className="">
@@ -10,15 +27,15 @@ const SideBar = () => {
           <NavLink to="/overview">Overview</NavLink>
           <NavLink to="/expenses">Expenses</NavLink>
           <NavLink to="/investments">Investments</NavLink>
-          <NavLink to="/insurances">Insurances</NavLink>
           <NavLink to="/incomes">Income</NavLink>
-          {/* <NavLink to=''>Logout</NavLink> */}
         </div>
       </div>
       <div className="pb-8 flex justify-between items-center">
-        <p>Dark/light Mode</p>
-        <button className="w-[100px] h-[35px] bg-textColor rounded-full relative">
-          <span className="bg-richBlack absolute top-1 left-1 rounded-full w-7 h-7"></span>
+        <button
+          onClick={() => handleLogout()}
+          className="cursor-pointer relative"
+        >
+          Logout
         </button>
       </div>
     </div>

@@ -10,9 +10,7 @@ Chart.register(Tooltip, Legend, ArcElement);
 
 const InvestmentPieChart = () => {
   const dispatch = useDispatch();
-  const { investmentDetails, isLoading } = useSelector(
-    (state) => state.investmentReducer
-  );
+  const { investmentDetails } = useSelector((state) => state.investmentReducer);
 
   useEffect(() => {
     dispatch(fetchInvestmentDetails());
@@ -57,16 +55,15 @@ const InvestmentPieChart = () => {
     plugins: {
       legend: {
         labels: {
-          color: " #b892ff", // 👈 legend text color
+          color: " #b892ff",
           font: {
             size: 14,
-            // weight: "bold",
           },
         },
       },
       tooltip: {
-        bodyColor: " #b892ff", // 👈 tooltip text color
-        titleColor: "#b892ff", // 👈 tooltip title color
+        bodyColor: " #b892ff",
+        titleColor: "#b892ff",
       },
     },
   };

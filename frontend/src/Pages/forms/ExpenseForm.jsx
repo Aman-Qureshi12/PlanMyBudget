@@ -46,10 +46,10 @@ const ExpenseForm = () => {
     axios
       .post("http://localhost:8000/expenses", ExpenseData, {
         headers: { "Content-Type": "application/json" },
+        withCredentials: true,
       })
       .then(() => console.log("The data has been send "))
       .catch((err) => console.log("There was an error sending the data ", err));
-    console.log("The data is ", ExpenseData);
   };
 
   // canceling the expense form logic
@@ -146,47 +146,3 @@ const ExpenseForm = () => {
 };
 
 export default ExpenseForm;
-
-// import React from "react";
-
-// import axios from "axios";
-// import { useState } from "react";
-
-// const ExpenseForm = () => {
-//   const [expense, setExpense] = useState("");
-//   const [date, setDate] = useState("");
-
-//   const handleExpenses = (e) => {
-//     e.preventDefault();
-
-//     const data = { expense, date };
-//     axios
-//       .post("http://localhost:8000/addExpense", data, {
-//         headers: { "Content-Type": "application/json" },
-//       })
-//       .then(() => console.log("The data has been send successfully"))
-//       .catch((err) => console.log("There was an error sending the data ", err));
-
-//     setDate("");
-//     setExpense("");
-//   };
-//   console.log("The value is ", date);
-//   return (
-//     <form onSubmit={handleExpenses}>
-//       <input
-//         type="number"
-//         placeholder="enter the expenseAmount"
-//         onChange={(e) => setExpense(e.target.value)}
-//         value={expense}
-//       />
-//       <input
-//         type="date"
-//         onChange={(e) => setDate(e.target.value)}
-//         value={date}
-//       />
-//       <button>Add Expense</button>
-//     </form>
-//   );
-// };
-
-// export default ExpenseForm;

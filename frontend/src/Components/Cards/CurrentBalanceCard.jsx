@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchExpenseTotal,
@@ -22,14 +22,6 @@ const CurrentBalanceCard = () => {
     monthlyIncome: state.incomeReducer.monthlyIncome,
     currentMonthExpense: state.expenseReducer.currentMonthExpense,
   }));
-
-  console.log("The current month expense is ", thisMonth);
-
-  const CurrentBalance = annualIncome - totalExpense;
-
-  const currentMonthBalance = monthlyIncome - thisMonth;
-  console.log(" The new current month expense is ", currentMonthBalance);
-
   useEffect(() => {
     setIsLoading(false);
 
@@ -43,6 +35,17 @@ const CurrentBalanceCard = () => {
     });
   }, [dispatch]);
 
+  let CurrentBalance = 0;
+  let currentMonthBalance = 0;
+
+  if (!annualIncome == 0 && !totalExpense == 0) {
+    CurrentBalance = annualIncome - totalExpense;
+  }
+
+  if (!monthlyIncome == 0 && !thisMonth == 0) {
+    currentMonthBalance = monthlyIncome - thisMonth;
+  }
+
   return (
     <div className="px-4 py-2 bg-yellowGreen text-richBlack w-full rounded-sm">
       <div>
@@ -52,7 +55,6 @@ const CurrentBalanceCard = () => {
           <p className="flex flex-col">
             <span className="text-2xl font-inter">Current Balance</span>
             <span className="font-bold text-2xl pt-3 font-inter">
-              {" "}
               {CurrentBalance}
             </span>
             <span className="pt-5 text-end font-roboto">

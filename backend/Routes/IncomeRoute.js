@@ -1,16 +1,20 @@
 import express from "express";
 import {
-  AddIncome,
+  addIncome,
+  deleteIncomes,
   getCurrency,
-  getIncome,
+  getIncomeTotal,
   getIncomeDetails,
+  updateIncomes,
 } from "../controller/IncomeController.js";
 
 const Router = express.Router();
 
-Router.post("/income", AddIncome);
+Router.post("/incomes", addIncome);
+Router.put("/incomes", updateIncomes);
+Router.delete("/incomes", deleteIncomes);
 Router.get("/incomeDetails", getIncomeDetails);
-Router.get("/income", getIncome);
+Router.get("/incomes", getIncomeTotal);
 Router.get("/currency", getCurrency);
 
 export default Router;

@@ -33,10 +33,10 @@ const ExpenseChart = () => {
   console.log(expenses);
 
   const monthlyData = useMemo(() => {
-    const sums = Array(12).fill(0); // [0,0,...,0] for 12 months
+    const sums = Array(12).fill(0);
 
     expenses?.forEach((expense) => {
-      const monthIndex = new Date(expense.date).getMonth(); // 0 = Jan, 11 = Dec
+      const monthIndex = new Date(expense.date).getMonth();
       sums[monthIndex] += expense.expenseAmount;
     });
 

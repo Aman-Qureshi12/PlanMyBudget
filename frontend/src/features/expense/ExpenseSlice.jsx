@@ -5,7 +5,7 @@ import axios from "axios";
 const initialState = {
   currentMonthExpense: 0,
   expenses: null,
-  totalExpense: null,
+  totalExpense: 0,
   isLoading: false,
   isError: false,
 };
@@ -14,20 +14,24 @@ const initialState = {
 export const fetchExpenseTotal = createAsyncThunk(
   "fetchExpenseTotal",
   async () => {
-    const response = await axios.get("http://localhost:8000/totalIncome");
-    return response.data.sumOfAllExpense[0].sumOfAllExpense;
+    const response = await axios.get("http://localhost:8000/totalIncome", {
+      withCredentials: true,
+    });
+    return response.data.expenseTotal;
   }
 );
 
 export const fetchingAllExpenses = createAsyncThunk(
   "fetchingAllExpenses",
   async () => {
-    const response = await axios.get("http://localhost:8000/expenses");
+    const response = await axios.get("http://localhost:8000/expenses", {
+      withCredentials: true,
+    });
 
     // Format each expense date to YYYY-MM-DD
     const formattedExpenses = response.data.allExpenses.map((expense) => ({
       ...expense,
-      date: expense.date.slice(0, 10), // "2025-08-17T00:00:00.000Z" -> "2025-08-17"
+      date: expense.date.slice(0, 10),
     }));
 
     return formattedExpenses;

@@ -12,11 +12,13 @@ const initialState = {
 export const fetchInvestmentDetails = createAsyncThunk(
   "fetchInvestmentDetails",
   async () => {
-    const response = await axios.get("http://localhost:8000/investments");
+    const response = await axios.get("http://localhost:8000/investments", {
+      withCredentials: true,
+    });
     const formattedInvestments = response.data.investments.map(
       (investment) => ({
         ...investment,
-        date: investment.date.slice(0, 10), // "2025-08-17T00:00:00.000Z" -> "2025-08-17"
+        date: investment.date.slice(0, 10),
       })
     );
     return formattedInvestments;
@@ -26,8 +28,10 @@ export const fetchInvestmentDetails = createAsyncThunk(
 export const fetchInvestmentTotal = createAsyncThunk(
   "fetchInvestmentTotal",
   async () => {
-    const response = await axios.get("http://localhost:8000/totalInvestments");
-    return response.data.sumOfAllInvestments[0].sumOfAllInvestments;
+    const response = await axios.get("http://localhost:8000/totalInvestments", {
+      withCredentials: true,
+    });
+    return response.data.sumOfAllInvestments;
   }
 );
 

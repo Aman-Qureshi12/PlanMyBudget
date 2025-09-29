@@ -55,16 +55,15 @@ const ExpensePieChart = () => {
     plugins: {
       legend: {
         labels: {
-          color: " #ead7d7", // 👈 legend text color
+          color: " #ead7d7",
           font: {
             size: 14,
-            // weight: "bold",
           },
         },
       },
       tooltip: {
-        bodyColor: " #ead7d7", // 👈 tooltip text color
-        titleColor: "#ead7d7", // 👈 tooltip title color
+        bodyColor: " #ead7d7",
+        titleColor: "#ead7d7",
       },
     },
   };

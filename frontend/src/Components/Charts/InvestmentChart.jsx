@@ -69,7 +69,7 @@ const InvestmentChart = () => {
     plugins: {
       legend: {
         labels: {
-          color: "#b892ff", // legend text color
+          color: "#b892ff",
           font: {
             size: 14,
           },

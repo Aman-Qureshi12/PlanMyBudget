@@ -39,7 +39,9 @@ const InvestmentForm = () => {
       investmentAmount: data.investmentAmount,
     };
     axios
-      .post("http://localhost:8000/investments", investmentFormData)
+      .post("http://localhost:8000/investments", investmentFormData, {
+        withCredentials: true,
+      })
       .then(() => console.log("Send Successfully"))
       .catch((err) =>
         console.log("there was an error sending the form data", err)

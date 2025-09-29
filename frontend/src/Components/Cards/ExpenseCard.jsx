@@ -29,7 +29,6 @@ const ExpenseCard = () => {
           <p className="flex flex-col">
             <span className="text-2xl font-inter">Total Expense</span>
             <span className="font-bold text-2xl pt-3 font-inter">
-              {" "}
               {totalExpense}
             </span>
             <span className="pt-5 text-end font-roboto">

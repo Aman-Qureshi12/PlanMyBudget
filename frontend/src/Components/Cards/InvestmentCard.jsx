@@ -29,7 +29,6 @@ const InvestmentCard = () => {
           <p className="flex flex-col">
             <span className="text-2xl font-inter">Total Investment</span>
             <span className="font-bold text-2xl pt-3 font-inter">
-              {" "}
               {totalInvestments}
             </span>
             <span className="pt-5 text-end font-roboto">
