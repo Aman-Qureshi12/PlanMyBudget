@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo } from "react";
 import { fetchingAllExpenses } from "../../features/expense/ExpenseSlice";
 import { Bar, Line } from "react-chartjs-2";
+
 import {
   Chart,
   CategoryScale,
@@ -23,14 +24,13 @@ Chart.register(
   Tooltip
 );
 
-const ExpenseChart = () => {
+const ExpenseChart = ({ seconds, direction }) => {
   const dispatch = useDispatch();
   const { expenses } = useSelector((state) => state.expenseReducer);
 
   useEffect(() => {
     dispatch(fetchingAllExpenses());
   }, [dispatch]);
-  console.log(expenses);
 
   const monthlyData = useMemo(() => {
     const sums = Array(12).fill(0);

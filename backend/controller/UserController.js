@@ -24,8 +24,8 @@ export const addUsers = async (req, res) => {
     // Create JWT token with the new user’s Mongo _id
     const token = jwt.sign(
       { id: newUser._id }, // ✅ _id from Mongoose doc
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      process.env.JWT_SECRET
+      // { expiresIn: "1h" }
     );
 
     // Set cookie
@@ -40,7 +40,6 @@ export const addUsers = async (req, res) => {
       redirect: "/expenses",
     });
   } catch (error) {
-    console.error("Error in addUsers:", error);
     res
       .status(500)
       .json({ message: "There was an error storing the user", error });
@@ -66,9 +65,9 @@ export const userLogin = async (req, res) => {
       {
         id: userExists._id,
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET
 
-      { expiresIn: "1hr" }
+      // { expiresIn: "1hr" }
     );
 
     res.cookie("token", token, {

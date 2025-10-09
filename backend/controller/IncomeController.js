@@ -12,7 +12,7 @@ export const addIncome = async (req, res) => {
   }
 
   try {
-    await IncomeModel.create({
+    const Incomes = await IncomeModel.create({
       category,
       annualIncome,
       monthlyIncome,
@@ -20,6 +20,7 @@ export const addIncome = async (req, res) => {
       source,
       user: userID,
     });
+
     res.status(200).json({ message: "Income data stored successfully" });
   } catch (error) {
     res
@@ -76,8 +77,9 @@ export const getIncomeTotal = async (req, res) => {
 
 // For getting the currency
 export const getCurrency = async (req, res) => {
+  const userID = req.user.id;
   try {
-    const Currency = await IncomeModel.find({}, { currency: 1 });
+    const Currency = await IncomeModel.find({ user: userID }, { currency: 1 });
     res.status(200).json({ Currency });
   } catch (error) {
     res
@@ -94,7 +96,6 @@ export const updateIncomes = async (req, res) => {
     const userID = req.user.id;
 
     const newMonthlyIncome = Math.round(annualIncome / 12);
-    console.log("The new monthlyIncome is ", newMonthlyIncome);
 
     // Ensure the income belongs to the logged-in user
     const updateIncome = await IncomeModel.findOneAndUpdate(
@@ -133,7 +134,10 @@ export const deleteIncomes = async (req, res) => {
       return res.status(400).json({ message: "No Income ID provided" });
     }
 
-    await IncomeModel.deleteOne({ _id: id, user: userID });
+    const deletedIncomes = await IncomeModel.deleteOne({
+      _id: id,
+      user: userID,
+    });
 
     res.status(200).json({ message: "Income deleted successfully" });
   } catch (error) {

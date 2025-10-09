@@ -16,6 +16,9 @@
 
   --font-inter: "Inter", sans-serif;
   --font-roboto: "Roboto", sans-serif;
+
+  --breakpoint-large: 1300px;
+  --breakpoint-small: 420px;
 }
 
 /* For Chrome, Safari, Edge, Opera */
@@ -28,4 +31,8 @@ input[type="number"]::-webkit-outer-spin-button {
 /* For Firefox */
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+body {
+  background-color: #0c090d;
 }

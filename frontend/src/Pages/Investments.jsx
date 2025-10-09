@@ -7,38 +7,56 @@ import InvestmentChart from "../Components/Charts/InvestmentChart";
 import InvestmentPieChart from "../Components/Charts/InvestmentPieChart";
 import CurrentBalanceCard from "../Components/Cards/CurrentBalanceCard";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { checkUserToken } from "../utils/userToken";
+import { fetchingCurrency } from "../features/income/IncomeSlice";
+import { motion } from "motion/react";
+import Modal from "../Components/Modal";
+import DeleteButton from "../Components/DeleteButton";
+import EditButton from "../Components/EditButton";
+import FilterByMonth from "../Components/filters/FilterByMonth";
+import FilterByCategory from "../Components/filters/FilterByCategory";
+import FilterByDate from "../Components/filters/FilterByDate";
+import SpinLoader from "../Components/SpinLoader";
+import Loader from "../Components/Loader";
+import { useCheckUser } from "../hooks/checkUser";
 
 const Investments = () => {
+  const [showModal, setShowModal] = useState({
+    update: false,
+    delete: false,
+    add: false,
+  });
+  const [loadingID, setLoadingID] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [investmentID, setInvestmentID] = useState("");
   const [investmentData, setInvestmentData] = useState([]);
   const [filterByDate, setFilterByDate] = useState("");
   const [filterByMonth, setFilterByMonth] = useState("");
   const [filterByCategory, setFilterByCategory] = useState("");
-  const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showTempLoader, setShowTempLoader] = useState(false);
 
-  useEffect(() => {
-    const verifyAuth = async () => {
-      const { authenticated, user } = await checkUserToken();
-
-      if (!authenticated && !user) {
-        navigate("/login");
-      } else {
-        setIsAuthenticated(true);
-      }
-    };
-    verifyAuth();
-  }, [navigate]);
+  useCheckUser();
 
   const dispatch = useDispatch();
-  const { investmentDetails, isLoading } = useSelector(
-    (state) => state.investmentReducer
+  const investmentDetails = useSelector(
+    (state) => state.investmentReducer.investmentDetails
   );
+  const isLoading = useSelector((state) => state.investmentReducer.isLoading);
+  const currency = useSelector((state) => state.incomeReducer.currency);
+
+  const triggerLoader = () => {
+    setShowTempLoader(true);
+    setTimeout(() => setShowTempLoader(false), 1000);
+  };
+
+  const currencySymbols = {
+    Rupee: "₹",
+    Dollar: "$",
+    Euro: "€",
+  };
 
   useEffect(() => {
     dispatch(fetchInvestmentDetails());
+    dispatch(fetchingCurrency());
   }, [dispatch]);
 
   const handleFilterByDate = (e) => {
@@ -52,36 +70,70 @@ const Investments = () => {
     setFilterByCategory(e.target.value);
   };
 
-  const filterCategories = investmentDetails?.filter(
-    (investment, index, self) =>
-      index ===
-      self.findIndex((invest) => invest.category === investment.category)
-  );
+  const filterCategories = investmentDetails
+    ?.map((investment) => {
+      return {
+        ...investment,
+        category:
+          investment.category.charAt(0).toUpperCase() +
+          investment.category.slice(1).toLowerCase(),
+      };
+    })
+    .filter(
+      (investment, index, self) =>
+        index ===
+        self.findIndex((invest) => invest.category === investment.category)
+    );
 
-  console.log("The new filtered Category is ", filterCategories);
-  console.log("The new Category is ", filterByCategory);
+  const normalizedFilterCategory = filterByCategory
+    ? filterByCategory.charAt(0).toUpperCase() +
+      filterByCategory.slice(1).toLowerCase()
+    : "";
 
   const filteredAndSortedInvestments = (investmentDetails || [])
     .filter((investment) => {
       const monthNumber = new Date(investment.date).getMonth() + 1;
+      const normalizedCategory =
+        investment.category.charAt(0).toUpperCase() +
+        investment.category.slice(1).toLowerCase();
 
-      if (monthNumber === Number(filterByMonth) && filterByCategory === "") {
-        return true;
-      }
-
-      if (filterByMonth === "" && filterByCategory === investment.category) {
-        return true;
-      }
-
+      // 1️⃣ No filters → show all
       if (
-        monthNumber === Number(filterByMonth) &&
-        filterByCategory === investment.category
+        (!filterByMonth || Number(filterByMonth) === 0) &&
+        (!filterByCategory || filterByCategory.toLowerCase() === "all")
       ) {
         return true;
       }
 
-      if (filterByMonth === "" && filterByCategory === "") {
-        return true;
+      // 2️⃣ Only month filter
+      if (
+        filterByMonth &&
+        Number(filterByMonth) !== 0 &&
+        (!filterByCategory || filterByCategory.toLowerCase() === "all")
+      ) {
+        return monthNumber === Number(filterByMonth);
+      }
+
+      // 3️⃣ Only category filter
+      if (
+        (!filterByMonth || Number(filterByMonth) === 0) &&
+        filterByCategory &&
+        filterByCategory.toLowerCase() !== "all"
+      ) {
+        return normalizedCategory === normalizedFilterCategory;
+      }
+
+      // 4️⃣ Both filters applied
+      if (
+        filterByMonth &&
+        Number(filterByMonth) !== 0 &&
+        filterByCategory &&
+        filterByCategory.toLowerCase() !== "all"
+      ) {
+        return (
+          monthNumber === Number(filterByMonth) &&
+          normalizedCategory === normalizedFilterCategory
+        );
       }
 
       return false;
@@ -96,15 +148,33 @@ const Investments = () => {
       return 0;
     });
 
+  // Modal logic
+  const triggerModal = (type) => {
+    setShowModal((prev) => ({ ...prev, [type]: true }));
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowModal({ update: false, delete: false, add: false });
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [showModal.add, showModal.update, showModal.delete]);
+
   // deleting Investments
   const handleDeleteInvestment = (id) => {
+    setLoadingID(id);
+    triggerLoader();
     axios
       .delete("http://localhost:8000/investments", {
         data: { id: id },
         withCredentials: true,
       })
-      .then(() => console.log("ID sent successfully"))
-      .catch((err) => console.log("There was an error sending the id ", err));
+      .then(() => {
+        triggerModal("delete");
+        dispatch(fetchInvestmentDetails());
+      })
+      .catch((err) => console.log("There was an error sending the id ", err))
+      .finally(() => setLoadingID(null));
   };
 
   const handleEditInvestmentData = (id, investment) => {
@@ -121,258 +191,230 @@ const Investments = () => {
   };
 
   const handleUpdateInvestments = async () => {
+    setLoading(true);
+    triggerLoader();
     await axios
       .put(
         "http://localhost:8000/investments",
         { id: investmentID, ...investmentData },
         { withCredentials: true }
       )
-      .then(() => console.log("Updated successfully"))
-      .catch(() => console.log("There was an error updating the data"));
+      .then(() => {
+        triggerModal("update");
+        dispatch(fetchInvestmentDetails());
+      })
+      .catch(() => console.log("There was an error updating the data"))
+      .finally(() => setLoading(false));
     setInvestmentID(null);
-    dispatch(fetchInvestmentDetails());
   };
 
   return (
-    <div className="pl-[22%] w-full py-20 pr-10 font-roboto text-Purple">
-      <div className="w-full flex gap-10 items-center">
-        <InvestmentCard />
-        <CurrentBalanceCard />
+    <div className="lg:pl-[22%] w-full py-20 max-lg:px-10 lg:pr-10 font-roboto text-Purple ">
+      <div className="w-full max-sm:flex-col flex gap-10 items-center">
+        <InvestmentCard seconds={0.1} direction={-100} />
+        <CurrentBalanceCard seconds={0.4} direction={-100} />
       </div>
 
-      <InvestmentForm />
-      <div className="w-full flex justify-between items-center">
+      <InvestmentForm triggerModal={triggerModal} />
+      <div className="w-full flex max-small:flex-col justify-between items-center  gap-10  small:overflow-x-auto">
         <InvestmentChart />
         <InvestmentPieChart />
       </div>
       <div className="pt-10">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-inter">All Investments </h1>
-          <div className="flex gap-10">
+        <div className="flex max-md:flex-col justify-between items-center">
+          <h1 className="text-2xl font-inter max-md:pb-10">All Investments </h1>
+          <motion.div
+            initial={{ x: 100, opacity: 0 }} // Start above & hidden
+            animate={{ x: 0, opacity: 1 }} // Slide down into place
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
+            className="flex max-md:gap-5 md:gap-10 flex-wrap items-center justify-center"
+          >
             {/* Filter by date  */}
-            <div>
-              <select
-                onChange={handleFilterByDate}
-                className="border-2 border-Purple rounded-sm px-4 py-2"
-              >
-                <option value="" disabled selected>
-                  Filter By Date
-                </option>
-                <option className="text-richBlack" value="Ascending">
-                  Ascending
-                </option>
-                <option className="text-richBlack" value="Descending">
-                  Descending
-                </option>
-              </select>
+            <div className="max-small:w-full">
+              <FilterByDate OnChange={handleFilterByDate} />
             </div>
             {/* filter By month*/}
-            <div>
-              <select
-                onChange={handleFilterByMonth}
-                className="border-2 border-Purple rounded-sm px-4 py-2"
-              >
-                <option value="" disabled selected>
-                  Filter By Months
-                </option>
-                <option className="text-richBlack" value="1">
-                  Jan
-                </option>
-                <option className="text-richBlack" value="2">
-                  Feb
-                </option>
-                <option className="text-richBlack" value="3">
-                  Mar
-                </option>
-                <option className="text-richBlack" value="4">
-                  Apr
-                </option>
-                <option className="text-richBlack" value="5">
-                  May
-                </option>
-                <option className="text-richBlack" value="6">
-                  Jun
-                </option>
-                <option className="text-richBlack" value="7">
-                  Jul
-                </option>
-                <option className="text-richBlack" value="8">
-                  Aug
-                </option>
-                <option className="text-richBlack" value="9">
-                  Sep
-                </option>
-                <option className="text-richBlack" value="10">
-                  Oct
-                </option>
-                <option className="text-richBlack" value="11">
-                  Nov
-                </option>
-                <option className="text-richBlack" value="12">
-                  Dec
-                </option>
-              </select>
+            <div className="max-small:w-full">
+              <FilterByMonth OnChange={handleFilterByMonth} />
             </div>
             {/* Filter By category  */}
-            <div>
-              <select
-                onChange={handleFilterByCategory}
-                className="border-2 border-Purple rounded-sm px-4 py-2"
-              >
-                <option value="" disabled selected>
-                  Filter By Category
-                </option>
-                {filterCategories?.map((investment) => (
-                  <option
-                    className="text-richBlack"
-                    value={investment.category}
-                  >
-                    {investment.category}
-                  </option>
-                ))}
-              </select>
+            <div className="max-small:w-full">
+              <FilterByCategory
+                OnChange={handleFilterByCategory}
+                categories={filterCategories}
+              />
             </div>
-          </div>
+          </motion.div>
         </div>
-        {isLoading ? (
-          "Loading ...."
+        {isLoading || showTempLoader ? (
+          <motion.div
+            className="flex mt-10 justify-center items-center"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+          >
+            <Loader bgBlack="bg-Purple" />
+          </motion.div>
         ) : (
-          <table className=" w-full mt-8 text-lg">
-            <tbody>
-              {filteredAndSortedInvestments ? (
-                <>
-                  {filteredAndSortedInvestments.length == 0 ? (
-                    "There is no Investment in this month"
-                  ) : (
-                    <>
-                      {filteredAndSortedInvestments.map((investment, index) => (
-                        <>
-                          {investment._id === investmentID ? (
-                            <tr key={investment._id}>
-                              <td>
-                                <input
-                                  name="date"
-                                  value={investmentData.date}
-                                  onChange={handleEditInvestments}
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  name="purpose"
-                                  value={investmentData.purpose}
-                                  onChange={handleEditInvestments}
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  name="category"
-                                  value={investmentData.category}
-                                  onChange={handleEditInvestments}
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  name="investmentAmount"
-                                  value={investmentData.investmentAmount}
-                                  onChange={handleEditInvestments}
-                                />
-                              </td>
-                              <td>
-                                <button onClick={handleUpdateInvestments}>
-                                  Save
-                                </button>
-                                <button onClick={() => setInvestmentID(null)}>
-                                  Cancel
-                                </button>
-                              </td>
-                            </tr>
-                          ) : (
-                            <tr key={index}>
-                              <td className=" px-4 py-2">{investment.date}</td>
-                              <td className="max-w-md px-4 py-2">
-                                {investment.purpose}
-                              </td>
-                              <td className=" px-4 py-2">
-                                {investment.category}
-                              </td>
-                              <td className=" px-4 py-2">
-                                {investment.investmentAmount}
-                              </td>
-                              <td className=" px-4 py-2">
-                                <button
-                                  onClick={() =>
-                                    handleEditInvestmentData(
-                                      investment._id,
-                                      investment
-                                    )
-                                  }
+          <div className="overflow-x-auto mt-8">
+            <table className="w-full max-md:min-w-[800px] text-lg mx-1">
+              <tbody>
+                {filteredAndSortedInvestments ? (
+                  <>
+                    {filteredAndSortedInvestments.length == 0 ? (
+                      <tr>
+                        <td colSpan="6" className="text-center py-4">
+                          No Investment
+                        </td>
+                      </tr>
+                    ) : (
+                      <>
+                        {filteredAndSortedInvestments.map(
+                          (investment, index) => (
+                            <>
+                              {investment._id === investmentID ? (
+                                <motion.tr
+                                  initial={{ opacity: 0 }} // hidden
+                                  animate={{ opacity: 1 }} // visible
+                                  transition={{ duration: 1, ease: "easeOut" }} // fade-in speed
+                                  key={investment._id}
                                 >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={1.5}
-                                    stroke="currentColor"
-                                    className="size-6"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+                                  <td>
+                                    <input
+                                      type="date"
+                                      className=" px-4 py-1  mr-3"
+                                      name="date"
+                                      value={investmentData.date}
+                                      onChange={handleEditInvestments}
                                     />
-                                  </svg>
-                                </button>
-                              </td>
-                              <td className=" px-4 py-2">
-                                <button
-                                  onClick={() =>
-                                    handleDeleteInvestment(investment._id)
-                                  }
+                                  </td>
+                                  <td>
+                                    <input
+                                      name="purpose"
+                                      className=" px-4 py-1  mr-3"
+                                      value={investmentData.purpose}
+                                      onChange={handleEditInvestments}
+                                    />
+                                  </td>
+                                  <td>
+                                    <input
+                                      name="category"
+                                      className=" px-4 py-1  mr-3"
+                                      value={investmentData.category}
+                                      onChange={handleEditInvestments}
+                                    />
+                                  </td>
+                                  <td>
+                                    <input
+                                      type="number"
+                                      className=" px-4 py-1  mr-3"
+                                      name="investmentAmount"
+                                      value={investmentData.investmentAmount}
+                                      onChange={handleEditInvestments}
+                                    />
+                                  </td>
+                                  <td>
+                                    <motion.button
+                                      whileTap={{ scale: 0.9 }}
+                                      className="px-4 py-2 bg-black rounded-sm mr-3"
+                                      onClick={() => setInvestmentID(null)}
+                                    >
+                                      Cancel
+                                    </motion.button>
+                                  </td>
+                                  <td>
+                                    <motion.button
+                                      whileTap={{ scale: 0.9 }}
+                                      className={` ${
+                                        loading
+                                          ? "bg-gray-400 cursor-not-allowed w-[140px]"
+                                          : "bg-Purple "
+                                      } px-4 py-2 rounded-sm  text-richBlack`}
+                                      onClick={handleUpdateInvestments}
+                                    >
+                                      {loading ? "Please wait..." : "Save"}
+                                    </motion.button>
+                                  </td>
+                                </motion.tr>
+                              ) : (
+                                <motion.tr
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -20 }}
+                                  transition={{
+                                    duration: 0.4,
+                                    ease: "easeOut",
+                                  }}
+                                  key={index}
                                 >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={1.5}
-                                    stroke="currentColor"
-                                    className="size-6"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                  <td className=" px-4 py-2">
+                                    {investment.date}
+                                  </td>
+                                  <td className="max-w-md px-4 py-2">
+                                    {investment.purpose}
+                                  </td>
+                                  <td className=" px-4 py-2">
+                                    {investment.category}
+                                  </td>
+                                  <td className=" px-4 py-2">
+                                    <span className="pr-1">
+                                      {currencySymbols[currency] || ""}{" "}
+                                    </span>{" "}
+                                    {investment.investmentAmount}
+                                  </td>
+                                  <td className=" px-4 py-2">
+                                    <EditButton
+                                      OnClick={() =>
+                                        handleEditInvestmentData(
+                                          investment._id,
+                                          investment
+                                        )
+                                      }
                                     />
-                                  </svg>
-                                </button>
-                              </td>
-                            </tr>
-                          )}
-                        </>
-                      ))}
-                    </>
-                  )}
-                </>
-              ) : (
-                ""
-                // <>
-                //   {investmentDetails?.map((investment, index) => (
-                //     <tr key={index}>
-                //       <td className=" px-4 py-2">{investment.date}</td>
-                //       <td className="max-w-md px-4 py-2">
-                //         {investment.purpose}
-                //       </td>
-                //       <td className=" px-4 py-2">{investment.category}</td>
-                //       <td className=" px-4 py-2">
-                //         {investment.investmentAmount}
-                //       </td>
-                //     </tr>
-                //   ))}
-                // </>
-              )}
-            </tbody>
-          </table>
+                                  </td>
+                                  <td className=" px-4 py-2">
+                                    {loadingID == investment._id ? (
+                                      <SpinLoader />
+                                    ) : (
+                                      <DeleteButton
+                                        OnClick={() =>
+                                          handleDeleteInvestment(investment._id)
+                                        }
+                                      />
+                                    )}
+                                  </td>
+                                </motion.tr>
+                              )}
+                            </>
+                          )
+                        )}
+                      </>
+                    )}
+                  </>
+                ) : (
+                  ""
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
+      <Modal
+        Message="Updated Successfully"
+        bgColor="Purple"
+        show={showModal.update}
+      />
+      <Modal
+        Message="Deleted Successfully"
+        bgColor="Purple"
+        show={showModal.delete}
+      />
+      <Modal
+        Message="Added Successfully"
+        bgColor="Purple"
+        show={showModal.add}
+      />
     </div>
   );
 };

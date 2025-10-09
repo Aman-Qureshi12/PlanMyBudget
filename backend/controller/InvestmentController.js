@@ -30,7 +30,6 @@ export const addInvestment = async (req, res) => {
 // For getting all the investments
 
 export const getAllInvestments = async (req, res) => {
-  console.log("The id is ", req.user.id);
   try {
     const investments = await InvestmentModel.find({
       user: req.user.id,
@@ -67,7 +66,6 @@ export const getInvestmentTotal = async (req, res) => {
 
     res.status(200).json({ sumOfAllInvestments });
   } catch (error) {
-    console.error("Error getting total investments:", error);
     res.status(500).json({
       message: "There was an error getting the total investments",
       error: error.message,

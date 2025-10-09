@@ -1,11 +1,8 @@
 import Layout from "../Layout/Layout";
 import Overview from "../Pages/Overview";
 import Expenses from "../Pages/Expenses";
-import Insurances from "../Pages/Insurances";
 import Investments from "../Pages/Investments";
 import { Route, Routes } from "react-router-dom";
-import IncomeForm from "../Pages/forms/IncomeForm";
-import ExpenseForm from "../Pages/forms/ExpenseForm";
 import Income from "../Pages/Income";
 import LandingPage from "../Pages/LandingPage";
 import SignIn from "../Pages/forms/SignIn";

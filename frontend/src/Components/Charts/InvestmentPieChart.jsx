@@ -30,14 +30,18 @@ const InvestmentPieChart = () => {
     categoryTotal[category] += investment.investmentAmount;
   });
 
-  console.log("The category Total is ", categoryTotal);
-
   const labels = Object.keys(categoryTotal);
-  const data = Object.values(categoryTotal);
+  let data = Object.values(categoryTotal);
 
   const colorScale = scaleOrdinal(schemeSet3);
 
-  const backgroundColors = labels.map((_, index) => colorScale(index));
+  let backgroundColors = labels.map((_, index) => colorScale(index));
+
+  if (data.length === 0) {
+    data = [0.1];
+    labels.push("No Data");
+    backgroundColors = ["#b892ff"]; // neutral gray
+  }
 
   const pieChartData = {
     labels,
@@ -69,7 +73,7 @@ const InvestmentPieChart = () => {
   };
 
   return (
-    <div className="pt-10 w-[50%] h-[400px]">
+    <div className="pt-10 w-[50%] max-small:w-full small:w-[50%] small:h-full">
       <Pie options={options} data={pieChartData} />
     </div>
   );

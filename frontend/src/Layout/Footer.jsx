@@ -4,19 +4,19 @@ import Twitter from "/public/socialMedia/darktwitter.svg";
 
 const Footer = () => {
   return (
-    <footer className="  text-richBlack pt-10 bg-textColor min-[2000px]:mx-auto min-[2000px]:max-w-[100rem]">
+    <footer className="  text-textColor pt-10 bg-richBlack ">
       <div className=" pb-10  ">
         <div className="flex justify-center content-center text-center items-center py-2">
-          <div className="flex-grow h-0.5 bg-richBlack ml-[13%]"></div>
+          <div className="flex-grow h-0.5 bg-textColor ml-[13%]"></div>
           <div className="mx-4">
             <a href="#home">
-              <h1 className="text-richBlack font-inter text-3xl">FinTrack</h1>
+              <h1 className="text-textColor font-inter text-3xl">FinTrack</h1>
             </a>
           </div>
-          <div className="flex-grow h-0.5 bg-richBlack mr-[13%]"></div>
+          <div className="flex-grow h-0.5 bg-textColor mr-[13%]"></div>
         </div>
         <div className="flex gap-6 justify-center items-center mt-8 ">
-          <div className=" flex justify-center items-center  w-10 h-10 smallest:w-12 smallest:h-12 bg-richBlack hover:bg-lightGreen  rounded-full cursor-pointer">
+          <div className=" flex justify-center items-center  w-10 h-10 smallest:w-12 smallest:h-12 bg-Purple hover:bg-lightGreen  rounded-full cursor-pointer">
             <img
               width={30}
               className="h-auto"
@@ -24,7 +24,7 @@ const Footer = () => {
               alt="Loading Img"
             />
           </div>
-          <div className="flex justify-center items-center w-10 h-10 smallest:w-12 smallest:h-12 bg-richBlack hover:bg-lightGreen  rounded-full cursor-pointer">
+          <div className="flex justify-center items-center w-10 h-10 smallest:w-12 smallest:h-12 bg-Purple hover:bg-lightGreen  rounded-full cursor-pointer">
             <img
               width={30}
               className="h-auto"
@@ -32,7 +32,7 @@ const Footer = () => {
               alt="Loading Img"
             />
           </div>
-          <div className=" flex justify-center items-center  w-10 h-10 smallest:w-12 smallest:h-12 bg-richBlack hover:bg-lightGreen  rounded-full cursor-pointer">
+          <div className=" flex justify-center items-center  w-10 h-10 smallest:w-12 smallest:h-12 bg-Purple hover:bg-lightGreen  rounded-full cursor-pointer">
             <img
               width={30}
               className="h-auto"

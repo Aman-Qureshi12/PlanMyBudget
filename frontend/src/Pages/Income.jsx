@@ -1,37 +1,42 @@
 import React, { useEffect, useState } from "react";
 import IncomeForm from "./forms/IncomeForm";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { checkUserToken } from "../utils/userToken";
+import { motion } from "motion/react";
 import {
   fetchingCurrency,
   fetchingIncome,
   fetchingIncomeDetails,
 } from "../features/income/IncomeSlice";
 import axios from "axios";
+import Modal from "../Components/Modal";
+import EditButton from "../Components/EditButton";
+import DeleteButton from "../Components/DeleteButton";
+import Loader from "../Components/Loader";
+import SpinLoader from "../Components/SpinLoader";
+import { useCheckUser } from "../hooks/checkUser";
 
 const Income = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState({
+    update: false,
+    delete: false,
+    add: false,
+  });
+  const [loadingID, setLoadingID] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [incomeID, setIncomeID] = useState(null);
   const [incomeData, setIncomeData] = useState([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showTempLoader, setShowTempLoader] = useState(false);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    const verifyAuth = async () => {
-      const { authenticated, user } = await checkUserToken();
+  useCheckUser();
 
-      if (!authenticated && !user) {
-        navigate("/login");
-      } else {
-        setIsAuthenticated(true);
-      }
-    };
-    verifyAuth();
-  }, [navigate]);
+  const triggerLoader = () => {
+    setShowTempLoader(true);
+    setTimeout(() => setShowTempLoader(false), 1000);
+  };
 
   const {
-    isCurrencyLoading,
+    isLoading,
     incomeDetails,
     isIncomeLoading,
     monthlyIncome,
@@ -39,31 +44,45 @@ const Income = () => {
     currency,
   } = useSelector((state) => state.incomeReducer);
 
-  console.log("The income detail is ", incomeDetails);
-
   const currencySymbols = {
     Rupee: "₹",
     Dollar: "$",
     Euro: "€",
   };
-
-  console.log(currencySymbols["Rupee"]);
-
   useEffect(() => {
     dispatch(fetchingIncomeDetails());
-    dispatch(fetchingCurrency());
     dispatch(fetchingIncome());
+    dispatch(fetchingCurrency());
   }, [dispatch]);
 
-  // Deleting the Expense
+  // Modal logic
+  const triggerModal = (type) => {
+    setShowModal((prev) => ({ ...prev, [type]: true }));
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowModal({ update: false, delete: false, add: false });
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [showModal.add, showModal.update, showModal.delete]);
+
+  // Deleting the Income
   const handleDeleteIncome = (incomeID) => {
+    setLoadingID(incomeID);
+    triggerLoader();
     axios
       .delete("http://localhost:8000/incomes", {
         data: { id: incomeID },
         withCredentials: true,
       })
-      .then(() => console.log("ID sent successfully "))
-      .catch(() => console.log("There was an error sending the ID"));
+      .then(() => {
+        dispatch(fetchingIncomeDetails());
+        dispatch(fetchingIncome());
+        triggerModal("delete");
+      })
+      .catch(() => console.log("There was an error sending the ID"))
+      .finally(() => setLoadingID(null));
   };
 
   // Editing the Income Data
@@ -82,6 +101,8 @@ const Income = () => {
   };
 
   const handleUpdateIncome = async () => {
+    setLoading(true);
+    triggerLoader();
     try {
       await axios.put(
         `http://localhost:8000/incomes`,
@@ -91,22 +112,30 @@ const Income = () => {
         },
         { withCredentials: true }
       );
-      console.log("The income data is ", incomeData);
-      console.log("Income updated successfully");
+
       setIncomeID(null); // exit edit mode
-      dispatch(fetchingIncomeDetails()); // refresh list
+      dispatch(fetchingIncomeDetails());
+      dispatch(fetchingIncome());
+      triggerModal("update");
     } catch (error) {
       console.error("Error updating income", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="pl-[22%] w-full py-20 pr-10 text-palePink font-roboto">
-      <div className="flex gap-10 w-full">
-        <div className="px-4 py-2 bg-textColor text-richBlack w-full">
-          <p>
+    <div className=" lg:pl-[22%] w-full py-20 max-lg:px-10 lg:pr-10 text-palePink font-roboto md:h-[100vh]">
+      <div className="w-full max-sm:flex-col flex gap-10 items-center ">
+        <motion.div
+          initial={{ y: -100, opacity: 0 }} // Start above & hidden
+          animate={{ y: 0, opacity: 1 }} // Slide down into place
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="px-4 py-2 bg-skyBlue text-richBlack w-full rounded-sm "
+        >
+          <div>
             {isIncomeLoading ? (
-              "Loading"
+              <Loader Text="Loading" bgBlack="bg-richBlack" />
             ) : (
               <span className="text-2xl">
                 Annual Income <br />
@@ -115,128 +144,193 @@ const Income = () => {
                 </span>
               </span>
             )}
-          </p>
-        </div>
-        <div className="px-4 py-2 bg-black text-white w-full">
-          <p>
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ y: -100, opacity: 0 }} // Start above & hidden
+          animate={{ y: 0, opacity: 1 }} // Slide down into place
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
+          className="px-4 py-2 bg-skyBlue text-richBlack w-full rounded-sm"
+        >
+          <div>
             {isIncomeLoading ? (
-              "Loading"
+              <Loader Text="Loading" bgBlack="bg-richBlack" />
             ) : (
               <span className="text-2xl">
                 Monthly Income <br />
-                <span className="font-bold "> {monthlyIncome}</span>
+                <span className="font-bold ">
+                  {currencySymbols[currency] || ""} {monthlyIncome}
+                </span>
               </span>
             )}
-          </p>
-        </div>
+          </div>
+        </motion.div>
       </div>
-      <IncomeForm />
-      <div>
-        <h1>All Incomes</h1>
-        {incomeDetails?.map((incomeDetail, index) => (
-          <>
-            {incomeDetail._id === incomeID ? (
-              <tr key={incomeDetail._id}>
-                <td>
-                  <select
-                    name="category"
-                    value={incomeData.category}
-                    onChange={handleEditIncome}
-                    className="border border-[#B8D279] text-white px-2 py-1 bg-black"
-                  >
-                    <option disabled value="">
-                      Select Category
-                    </option>
-                    <option value="Primary">Primary</option>
-                    <option value="Secondary">Secondary</option>
-                  </select>
-                </td>
-                <td>
-                  <input
-                    name="source"
-                    value={incomeData.source}
-                    onChange={handleEditIncome}
-                  />
-                </td>
-                <td>
-                  <select
-                    name="currency"
-                    value={incomeData.currency}
-                    onChange={handleEditIncome}
-                    className="border border-[#B8D279] text-white px-2 py-1 bg-black"
-                  >
-                    <option disabled value="">
-                      Select Currency
-                    </option>
-                    <option value="Rupee">Rupee</option>
-                    <option value="Euro">Euro</option>
-                    <option value="Dollar">Dollar</option>
-                  </select>
-                </td>
-                <td>
-                  <input
-                    name="annualIncome"
-                    value={incomeData.annualIncome}
-                    onChange={handleEditIncome}
-                  />
-                </td>
-                <td>
-                  <button onClick={handleUpdateIncome}>Save</button>
-                  <button onClick={() => setIncomeID(null)}>Cancel</button>
-                </td>
-              </tr>
-            ) : (
-              <tr key={index}>
-                <td className=" px-4 py-2">{incomeDetail.category}</td>
-                <td className="max-w-md px-4 py-2">{incomeDetail.source}</td>
-                <td className=" px-4 py-2">{incomeDetail.annualIncome}</td>
-                <td className=" px-4 py-2">{incomeDetail.monthlyIncome}</td>
 
-                <td className=" px-4 py-2">
-                  <button
-                    onClick={() =>
-                      handleIncomeID(incomeDetail._id, incomeDetail)
-                    }
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                      />
-                    </svg>
-                  </button>
-                </td>
-                <td className=" px-4 py-2">
-                  <button onClick={() => handleDeleteIncome(incomeDetail._id)}>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                      />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            )}
-          </>
-        ))}
+      {/* Income Form  */}
+      <IncomeForm triggerModal={triggerModal} Currency={currency} />
+      <div className="w-full bg-richBlack">
+        <h1 className="text-3xl font-inter text-skyBlue pt-10">All Incomes</h1>
+        {isLoading || showTempLoader ? (
+          <motion.div
+            className="flex mt-10 justify-center items-center"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+          >
+            <Loader bgBlack="bg-skyBlue" />
+          </motion.div>
+        ) : (
+          <div className="overflow-x-auto mt-8">
+            <table className=" w-full max-md:min-w-[800px] text-lg mx-1 text-skyBlue">
+              <tbody>
+                {incomeDetails?.map((incomeDetail, index) => (
+                  <>
+                    {incomeDetail._id === incomeID ? (
+                      <motion.tr
+                        initial={{ opacity: 0 }} // hidden
+                        animate={{ opacity: 1 }} // visible
+                        transition={{ duration: 1, ease: "easeOut" }} // fade-in speed
+                        key={incomeDetail._id}
+                      >
+                        <td>
+                          <select
+                            name="category"
+                            value={incomeData.category}
+                            onChange={handleEditIncome}
+                            className="px-4 py-1  mr-3 rounded-sm border-2 bg-richBlack border-textColor"
+                          >
+                            <option disabled value="">
+                              Select Category
+                            </option>
+                            <option value="Primary">Primary</option>
+                            <option value="Secondary">Secondary</option>
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            className="px-4 py-1  mr-3"
+                            name="source"
+                            value={incomeData.source}
+                            onChange={handleEditIncome}
+                          />
+                        </td>
+                        <td>
+                          <select
+                            name="currency"
+                            value={incomeData.currency}
+                            onChange={handleEditIncome}
+                            className="px-4 py-1  mr-3 rounded-sm border-2 bg-richBlack border-textColor"
+                          >
+                            <option disabled value="">
+                              Select Currency
+                            </option>
+                            <option value="Rupee">Rupee</option>
+                            <option value="Euro">Euro</option>
+                            <option value="Dollar">Dollar</option>
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            className="px-4 py-1  mr-3"
+                            name="annualIncome"
+                            value={incomeData.annualIncome}
+                            onChange={handleEditIncome}
+                          />
+                        </td>
+                        <td>
+                          <motion.button
+                            whileTap={{ scale: 0.9 }}
+                            className="px-4 py-2 bg-black rounded-sm mr-3"
+                            onClick={() => setIncomeID(null)}
+                          >
+                            Cancel
+                          </motion.button>
+                        </td>
+                        <td>
+                          <motion.button
+                            name="update"
+                            disabled={loading}
+                            whileTap={{ scale: 0.9 }}
+                            className={` ${
+                              loading
+                                ? "bg-gray-400  cursor-not-allowed w-[140px]"
+                                : "bg-skyBlue "
+                            } px-4 py-2 rounded-sm  text-richBlack`}
+                            onClick={handleUpdateIncome}
+                          >
+                            {loading ? "Please wait..." : "Save"}
+                          </motion.button>
+                        </td>
+                      </motion.tr>
+                    ) : (
+                      <motion.tr
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                        key={index}
+                      >
+                        <td className=" px-4 py-2">{incomeDetail.category}</td>
+                        <td className="max-w-md px-4 py-2">
+                          {incomeDetail.source}
+                        </td>
+                        <td className=" px-4 py-2">
+                          <span className="pr-1">
+                            {currencySymbols[currency] || ""}{" "}
+                          </span>
+                          {incomeDetail.annualIncome}
+                        </td>
+                        <td className=" px-4 py-2 ">
+                          <span className="pr-1">
+                            {currencySymbols[currency] || ""}{" "}
+                          </span>
+                          {incomeDetail.monthlyIncome}
+                        </td>
+
+                        <td className=" px-4 py-2">
+                          <EditButton
+                            OnClick={() =>
+                              handleIncomeID(incomeDetail._id, incomeDetail)
+                            }
+                          />
+                        </td>
+                        <td className=" px-4 py-2">
+                          {loadingID == incomeDetail._id ? (
+                            <SpinLoader />
+                          ) : (
+                            <DeleteButton
+                              OnClick={() =>
+                                handleDeleteIncome(incomeDetail._id)
+                              }
+                            />
+                          )}
+                        </td>
+                      </motion.tr>
+                    )}
+                  </>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
+      <Modal
+        Message="Updated Successfully"
+        bgColor="skyBlue"
+        show={showModal.update}
+      />
+      <Modal
+        Message="Deleted Successfully"
+        bgColor="skyBlue"
+        show={showModal.delete}
+      />
+      <Modal
+        Message="Added Successfully"
+        bgColor="skyBlue"
+        show={showModal.add}
+      />
     </div>
   );
 };

@@ -6,38 +6,61 @@ import ExpenseChart from "../Components/Charts/ExpenseChart";
 import ExpenseCard from "../Components/Cards/ExpenseCard";
 import ExpensePieChart from "../Components/Charts/ExpensePieChart";
 import CurrentBalanceCard from "../Components/Cards/CurrentBalanceCard";
-import { useNavigate } from "react-router-dom";
-import { checkUserToken } from "../utils/userToken";
 import axios from "axios";
+import { fetchingCurrency } from "../features/income/IncomeSlice";
+import { motion } from "motion/react";
+import Modal from "../Components/Modal";
+import EditButton from "../Components/EditButton";
+import DeleteButton from "../Components/DeleteButton";
+import FilterByDate from "../Components/filters/FilterByDate";
+import FilterByMonth from "../Components/filters/FilterByMonth";
+import FilterByCategory from "../Components/filters/FilterByCategory";
+import SpinLoader from "../Components/SpinLoader";
+import Loader from "../Components/Loader";
+import { useCheckUser } from "../hooks/checkUser";
 
 const Expenses = () => {
+  const [showModal, setShowModal] = useState({
+    update: false,
+    delete: false,
+    add: false,
+    errors: false,
+  });
+  const [loadingID, setLoadingID] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [expenseID, setExpenseID] = useState(null);
   const [expenseData, setExpenseData] = useState([]);
   const [filterByDate, setFilterByDate] = useState("");
   const [filterByMonth, setFilterByMonth] = useState("");
   const [filterByCategory, setFilterByCategory] = useState("");
-  const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showTempLoader, setShowTempLoader] = useState(false);
 
-  useEffect(() => {
-    const verifyAuth = async () => {
-      const { authenticated, user } = await checkUserToken();
+  useCheckUser();
 
-      if (!authenticated && !user) {
-        navigate("/login");
-      } else {
-        setIsAuthenticated(true);
-      }
-    };
-    verifyAuth();
-  }, [navigate]);
-
+  // Dispatching the actions
   const dispatch = useDispatch();
-  const { expenses, isLoading } = useSelector((state) => state.expenseReducer);
+  const expenses = useSelector((state) => state.expenseReducer.expenses);
+  const isLoading = useSelector((state) => state.expenseReducer.isLoading);
+  const currency = useSelector((state) => state.incomeReducer.currency);
+
+  const triggerLoader = () => {
+    setShowTempLoader(true);
+    setTimeout(() => setShowTempLoader(false), 1000);
+  };
 
   useEffect(() => {
     dispatch(fetchingAllExpenses());
+    dispatch(fetchingCurrency());
   }, [dispatch]);
+
+  // Currency symbol check
+  const currencySymbols = {
+    Rupee: "₹",
+    Dollar: "$",
+    Euro: "€",
+  };
+
+  // Handling the filters
 
   const handleFilterByDate = (e) => {
     setFilterByDate(e.target.value);
@@ -50,35 +73,69 @@ const Expenses = () => {
     setFilterByCategory(e.target.value);
   };
 
-  const filterCategories = expenses?.filter(
-    (expense, index, self) =>
-      index === self.findIndex((e) => e.category === expense.category)
-  );
+  // Build unique categories case-insensitive
+  const filterCategories = expenses
+    ?.map((expense) => {
+      return {
+        ...expense,
+        category:
+          expense.category.charAt(0).toUpperCase() +
+          expense.category.slice(1).toLowerCase(),
+      };
+    })
+    .filter(
+      (expense, index, self) =>
+        index === self.findIndex((e) => e.category === expense.category)
+    );
 
-  console.log("The new filtered Category is ", filterCategories);
-  console.log("The new Category is ", filterByCategory);
+  const normalizedFilterCategory = filterByCategory
+    ? filterByCategory.charAt(0).toUpperCase() +
+      filterByCategory.slice(1).toLowerCase()
+    : "";
 
   const filteredAndSortedExpenses = (expenses || [])
     .filter((expense) => {
       const monthNumber = new Date(expense.date).getMonth() + 1;
-
-      if (monthNumber === Number(filterByMonth) && filterByCategory === "") {
-        return true;
-      }
-
-      if (filterByMonth === "" && filterByCategory === expense.category) {
-        return true;
-      }
+      const normalizedCategory =
+        expense.category.charAt(0).toUpperCase() +
+        expense.category.slice(1).toLowerCase();
 
       if (
-        monthNumber === Number(filterByMonth) &&
-        filterByCategory === expense.category
+        (!filterByMonth || Number(filterByMonth) === 0) &&
+        (!filterByCategory || filterByCategory.toLowerCase() === "all")
       ) {
         return true;
       }
 
-      if (filterByMonth === "" && filterByCategory === "") {
-        return true;
+      // 2️⃣ Only month filter
+      if (
+        filterByMonth &&
+        Number(filterByMonth) !== 0 &&
+        (!filterByCategory || filterByCategory.toLowerCase() === "all")
+      ) {
+        return monthNumber === Number(filterByMonth);
+      }
+
+      // 3️⃣ Only category filter
+      if (
+        (!filterByMonth || Number(filterByMonth) === 0) &&
+        filterByCategory &&
+        filterByCategory.toLowerCase() !== "all"
+      ) {
+        return normalizedCategory === normalizedFilterCategory;
+      }
+
+      // 4️⃣ Both filters applied
+      if (
+        filterByMonth &&
+        Number(filterByMonth) !== 0 &&
+        filterByCategory &&
+        filterByCategory.toLowerCase() !== "all"
+      ) {
+        return (
+          monthNumber === Number(filterByMonth) &&
+          normalizedCategory === normalizedFilterCategory
+        );
       }
 
       return false;
@@ -90,22 +147,42 @@ const Expenses = () => {
       if (filterByDate === "Descending") {
         return new Date(b.date) - new Date(a.date);
       }
-      return 0;
+      if (filterByDate == "all") return 0;
     });
+
+  // Modal logic
+  const triggerModal = (type) => {
+    setShowModal((prev) => ({ ...prev, [type]: true }));
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowModal({ update: false, delete: false, add: false, errors: false });
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [showModal.add, showModal.update, showModal.delete, showModal.errors]);
 
   // Deleting the Expense
   const handleDeleteExpense = (expenseID) => {
+    setLoadingID(expenseID);
+    triggerLoader();
     axios
       .delete("http://localhost:8000/expenses", {
         data: { id: expenseID },
         withCredentials: true,
       })
-      .then(() => console.log("ID sent successfully "))
-      .catch(() => console.log("There was an error sending the ID"));
+      .then(() => {
+        triggerModal("delete");
+        dispatch(fetchingAllExpenses());
+      })
+      .catch(() => {
+        console.log("Something went wrong in thr delete");
+        triggerModal("errors");
+      })
+      .finally(() => setLoadingID(null));
   };
 
-  // Editing the Expense Data
-
+  // updating the expense data
   const handleExpenseID = (id, expense) => {
     setExpenseID(id);
     setExpenseData(expense);
@@ -120,6 +197,8 @@ const Expenses = () => {
   };
 
   const handleUpdateExpense = async () => {
+    setLoading(true);
+    triggerLoader();
     try {
       await axios.put(
         `http://localhost:8000/expenses`,
@@ -129,246 +208,224 @@ const Expenses = () => {
         },
         { withCredentials: true }
       );
-      console.log("The expense data is ", expenseData);
-      console.log("Expense updated successfully");
       setExpenseID(null); // exit edit mode
       dispatch(fetchingAllExpenses()); // refresh list
-    } catch (error) {
-      console.error("Error updating expense", error);
+      triggerModal("update");
+    } catch {
+      console.log("Something went wrong in thr delete");
+      triggerModal("errors");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className=" pl-[22%] w-full py-20 pr-10 text-palePink font-roboto">
-      <div className="w-full flex gap-10 items-center">
-        <ExpenseCard />
-        <CurrentBalanceCard />
+    <div className=" lg:pl-[22%] w-full py-20 max-lg:px-10 lg:pr-10 text-palePink font-roboto">
+      <div className="w-full max-sm:flex-col flex gap-10 items-center ">
+        <ExpenseCard seconds={0.1} direction={-100} />
+        <CurrentBalanceCard seconds={0.4} direction={-100} />
       </div>
 
       {/* Expense Form  */}
-      <ExpenseForm />
-      <div className="w-full flex justify-between items-center">
+      <ExpenseForm triggerModal={triggerModal} />
+      <div className="w-full flex max-small:flex-col justify-between items-center  gap-10  small:overflow-x-auto">
         <ExpenseChart />
         <ExpensePieChart />
       </div>
       <div className="pt-10">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-inter">All Expenses </h1>
-          <div className="flex gap-10">
+        <div className="flex max-md:flex-col justify-between items-center ">
+          <h1 className="text-2xl font-inter  max-md:pb-10">All Expenses </h1>
+          <motion.div
+            initial={{ x: 100, opacity: 0 }} // Start above & hidden
+            animate={{ x: 0, opacity: 1 }} // Slide down into place
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
+            className="flex max-md:gap-5 md:gap-10 flex-wrap items-center justify-center"
+          >
             {/* Filter by date  */}
-            <div>
-              <select
-                onChange={handleFilterByDate}
-                className="border-2 border-palePink rounded-sm px-4 py-2"
-              >
-                <option value="" disabled selected>
-                  Filter By Date
-                </option>
-                <option className="text-richBlack" value="Ascending">
-                  Ascending
-                </option>
-                <option className="text-richBlack" value="Descending">
-                  Descending
-                </option>
-              </select>
+            <div className="max-small:w-full">
+              <FilterByDate OnChange={handleFilterByDate} />
             </div>
             {/* filter By month*/}
-            <div>
-              <select
-                onChange={handleFilterByMonth}
-                className="border-2 border-palePink rounded-sm px-4 py-2 "
-              >
-                <option value="" disabled selected>
-                  Filter By Months
-                </option>
-                <option className="text-richBlack" value="1">
-                  Jan
-                </option>
-                <option className="text-richBlack" value="2">
-                  Feb
-                </option>
-                <option className="text-richBlack" value="3">
-                  Mar
-                </option>
-                <option className="text-richBlack" value="4">
-                  Apr
-                </option>
-                <option className="text-richBlack" value="5">
-                  May
-                </option>
-                <option className="text-richBlack" value="6">
-                  Jun
-                </option>
-                <option className="text-richBlack" value="7">
-                  Jul
-                </option>
-                <option className="text-richBlack" value="8">
-                  Aug
-                </option>
-                <option className="text-richBlack" value="9">
-                  Sep
-                </option>
-                <option className="text-richBlack" value="10">
-                  Oct
-                </option>
-                <option className="text-richBlack" value="11">
-                  Nov
-                </option>
-                <option className="text-richBlack" value="12">
-                  Dec
-                </option>
-              </select>
+            <div className="max-small:w-full">
+              <FilterByMonth OnChange={handleFilterByMonth} />
             </div>
             {/* Filter By category  */}
-            <div>
-              <select
-                onChange={handleFilterByCategory}
-                className="border-2 border-palePink rounded-sm px-4 py-2 "
-              >
-                <option value="" disabled selected>
-                  Filter By Category
-                </option>
-                {filterCategories?.map((expense) => (
-                  <option className="text-richBlack" value={expense.category}>
-                    {expense.category}
-                  </option>
-                ))}
-              </select>
+            <div className="max-small:w-full">
+              <FilterByCategory
+                OnChange={handleFilterByCategory}
+                categories={filterCategories}
+              />
             </div>
-          </div>
+          </motion.div>
         </div>
-        {isLoading ? (
-          "Loading ...."
+        {isLoading || showTempLoader ? (
+          <motion.div
+            className="flex mt-10 justify-center items-center"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+          >
+            <Loader bgBlack="bg-palePink" />
+          </motion.div>
         ) : (
-          <table className=" w-full mt-8 text-lg">
-            <tbody>
-              {filteredAndSortedExpenses ? (
-                <>
-                  {filteredAndSortedExpenses.length == 0 ? (
-                    "There is no expense in this month"
-                  ) : (
-                    <>
-                      {filteredAndSortedExpenses.map((expense, index) => (
-                        <>
-                          {expense._id === expenseID ? (
-                            <tr key={expense._id}>
-                              <td>
-                                <input
-                                  name="date"
-                                  value={expenseData.date}
-                                  onChange={handleEditExpense}
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  name="purpose"
-                                  value={expenseData.purpose}
-                                  onChange={handleEditExpense}
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  name="category"
-                                  value={expenseData.category}
-                                  onChange={handleEditExpense}
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  name="expenseAmount"
-                                  value={expenseData.expenseAmount}
-                                  onChange={handleEditExpense}
-                                />
-                              </td>
-                              <td>
-                                <button onClick={handleUpdateExpense}>
-                                  Save
-                                </button>
-                                <button onClick={() => setExpenseID(null)}>
-                                  Cancel
-                                </button>
-                              </td>
-                            </tr>
-                          ) : (
-                            <tr key={index}>
-                              <td className=" px-4 py-2">{expense.date}</td>
-                              <td className="max-w-md px-4 py-2">
-                                {expense.purpose}
-                              </td>
-                              <td className=" px-4 py-2">{expense.category}</td>
-                              <td className=" px-4 py-2">
-                                {expense.expenseAmount}
-                              </td>
+          <div className="overflow-x-auto mt-8">
+            <table className="w-full max-md:min-w-[800px] text-lg mx-1">
+              <tbody>
+                {filteredAndSortedExpenses && (
+                  <>
+                    {filteredAndSortedExpenses.length == 0 ? (
+                      <tr>
+                        <td colSpan="6" className="text-center py-4">
+                          No expense
+                        </td>
+                      </tr>
+                    ) : (
+                      <>
+                        {filteredAndSortedExpenses.map((expense, index) => (
+                          <>
+                            {expense._id === expenseID ? (
+                              <motion.tr
+                                initial={{ opacity: 0 }} // hidden
+                                animate={{ opacity: 1 }} // visible
+                                transition={{ duration: 1, ease: "easeOut" }} // fade-in speed
+                                key={expense._id}
+                              >
+                                <td>
+                                  <input
+                                    type="date"
+                                    className=" px-4 py-1  mr-3"
+                                    name="date"
+                                    value={expenseData.date}
+                                    onChange={handleEditExpense}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    className=" px-4 py-1 mr-3 "
+                                    name="purpose"
+                                    value={expenseData.purpose}
+                                    onChange={handleEditExpense}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    className=" px-4 py-1  mr-3"
+                                    name="category"
+                                    value={expenseData.category}
+                                    onChange={handleEditExpense}
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="number"
+                                    className=" px-4 py-1 mr-3"
+                                    name="expenseAmount"
+                                    value={expenseData.expenseAmount}
+                                    onChange={handleEditExpense}
+                                  />
+                                </td>
+                                <td>
+                                  <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    type="button"
+                                    className="px-4 py-2 bg-black rounded-sm mr-3"
+                                    onClick={() => setExpenseID(null)}
+                                  >
+                                    Cancel
+                                  </motion.button>
+                                </td>
+                                <td>
+                                  <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    type="button"
+                                    disabled={loading}
+                                    name="update"
+                                    className={` ${
+                                      loading
+                                        ? "bg-gray-400 cursor-not-allowed w-[140px]"
+                                        : "bg-palePink "
+                                    } px-4 py-2 rounded-sm  text-richBlack`}
+                                    onClick={handleUpdateExpense}
+                                  >
+                                    {loading ? "Please wait..." : "Save"}
+                                  </motion.button>
+                                </td>
+                              </motion.tr>
+                            ) : (
+                              <motion.tr
+                                key={expense._id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.4, ease: "easeOut" }}
+                              >
+                                <td className=" px-4 py-2">{expense.date}</td>
+                                <td className="max-w-md px-4 py-2">
+                                  {expense.purpose}
+                                </td>
+                                <td className=" px-4 py-2">
+                                  {expense.category}
+                                </td>
+                                <td className=" px-4 py-2">
+                                  <span className="pr-1">
+                                    {currencySymbols[currency] || ""}{" "}
+                                  </span>
+                                  {expense.expenseAmount}
+                                </td>
 
-                              <td className=" px-4 py-2">
-                                <button
-                                  onClick={() =>
-                                    handleExpenseID(expense._id, expense)
-                                  }
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={1.5}
-                                    stroke="currentColor"
-                                    className="size-6"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+                                <td className=" px-4 py-2">
+                                  <EditButton
+                                    OnClick={() =>
+                                      handleExpenseID(expense._id, expense)
+                                    }
+                                  />
+                                </td>
+                                <td className=" px-4 py-2">
+                                  {loadingID == expense._id ? (
+                                    <SpinLoader />
+                                  ) : (
+                                    <DeleteButton
+                                      OnClick={() =>
+                                        handleDeleteExpense(expense._id)
+                                      }
                                     />
-                                  </svg>
-                                </button>
-                              </td>
-                              <td className=" px-4 py-2">
-                                <button
-                                  onClick={() =>
-                                    handleDeleteExpense(expense._id)
-                                  }
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={1.5}
-                                    stroke="currentColor"
-                                    className="size-6"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                                    />
-                                  </svg>
-                                </button>
-                              </td>
-                            </tr>
-                          )}
-                        </>
-                      ))}
-                    </>
-                  )}
-                </>
-              ) : (
-                // <>
-                {
-                  /* {expenses?.map((expense, index) => (
-                    <tr key={index}>
-                      <td className=" px-4 py-2">{expense.date}</td>
-                      <td className="max-w-md px-4 py-2">{expense.purpose}</td>
-                      <td className=" px-4 py-2">{expense.category}</td>
-                      <td className=" px-4 py-2">{expense.expenseAmount}</td>
-                    </tr>
-                  ))}
-                </> */
-                }
-              )}
-            </tbody>
-          </table>
+                                  )}
+                                </td>
+                              </motion.tr>
+                            )}
+                          </>
+                        ))}
+                      </>
+                    )}
+                  </>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
+      <Modal
+        Message="Updated Successfully"
+        bgColor="palePink"
+        show={showModal.update}
+      />
+
+      <Modal
+        Message="Deleted Successfully"
+        bgColor="palePink"
+        show={showModal.delete}
+      />
+      <Modal
+        Message="Added Successfully"
+        bgColor="palePink"
+        show={showModal.add}
+      />
+      <Modal
+        Message="Something went wrong Try again later"
+        bgColor="PurPle"
+        show={showModal.errors}
+      />
     </div>
   );
 };

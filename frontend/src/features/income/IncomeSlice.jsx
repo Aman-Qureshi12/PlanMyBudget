@@ -9,6 +9,7 @@ const initialState = {
   isIncomeLoading: false,
   isCurrencyLoading: false,
   isError: false,
+  isLoading: false,
 };
 
 export const fetchingIncomeDetails = createAsyncThunk(
