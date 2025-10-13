@@ -10,8 +10,7 @@ import Loader from "../../Components/Loader";
 
 // € - euro  $ - dollar ₹ - rupee
 
-const IncomeForm = ({ triggerModal, Currency }) => {
-  console.log("The currency is ", Currency);
+const IncomeForm = ({ triggerModal, Currency, setApiErrors }) => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const ref = useRef(null);
@@ -92,7 +91,7 @@ const IncomeForm = ({ triggerModal, Currency }) => {
         dispatch(fetchingIncomeDetails());
         triggerModal("add");
       })
-      .catch(() => console.log("There was an error sending the data "))
+      .catch(() => setApiErrors(true))
       .finally(() => setLoading(false));
   };
 
@@ -111,7 +110,7 @@ const IncomeForm = ({ triggerModal, Currency }) => {
       </div>
 
       <AnimatePresence>
-        {showForm ? (
+        {showForm && (
           <>
             <motion.form
               initial={{ y: -100, opacity: 0 }}
@@ -151,61 +150,110 @@ const IncomeForm = ({ triggerModal, Currency }) => {
                 </div>
               </div>
 
-              <div className="flex gap-6 max-large:flex-col w-full">
-                <div className={`${Currency ? "hidden" : "visible"} w-full`}>
-                  <select
-                    className="px-4 py-2 rounded-sm border-2 bg-richBlack border-textColor w-full"
-                    {...register("currency")}
-                  >
-                    <option disabled value="">
-                      Select Currency
-                    </option>
-                    <option value="Rupee">Rupee</option>
-                    <option value="Euro">Euro</option>
-                    <option value="Dollar">Dollar</option>
-                  </select>
-                  {errors.currency && (
-                    <p className="text-red-500">{errors.currency.message}</p>
-                  )}
-                </div>
-                <div className="w-full">
-                  <input
-                    type="number"
-                    placeholder="Annual Income"
-                    className="px-4 py-2 rounded-sm border-2 border-textColor w-full"
-                    {...register("annualIncome")}
-                  />
-                  {errors.annualIncome && (
-                    <p className="text-red-500">
-                      {errors.annualIncome.message}
-                    </p>
-                  )}
-                </div>
-              </div>
+              {Currency ? (
+                <div className="flex w-full gap-6 max-large:flex-col">
+                  <div className="flex gap-6 max-large:flex-col w-full">
+                    <div className="w-full">
+                      <input
+                        type="number"
+                        placeholder="Annual Income"
+                        className="px-4 py-2 rounded-sm border-2 border-textColor w-full"
+                        {...register("annualIncome")}
+                      />
+                      {errors.annualIncome && (
+                        <p className="text-red-500">
+                          {errors.annualIncome.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-              <div className="flex gap-6  max-large:flex-col max-sm:w-full">
-                <motion.button
-                  type="button"
-                  whileTap={{ scale: 0.9 }}
-                  onClick={handleIncomeFormCancelling}
-                  className="text-base px-4 py-2 bg-black text-skyBlue rounded-sm cursor-pointer"
-                >
-                  Cancel
-                </motion.button>
-                <motion.button
-                  type="submit"
-                  whileTap={{ scale: 0.9 }}
-                  disabled={loading}
-                  className={` ${
-                    loading ? "bg-gray-400 cursor-not-allowed" : "bg-skyBlue  "
-                  } text-base  px-4 py-2 rounded-sm text-richBlack`}
-                >
-                  {loading ? <Loader bgBlack="bg-richBlack" /> : " Submit"}
-                </motion.button>
-              </div>
+                  <div className="flex gap-6 max-sm:flex-col  max-sm:w-full">
+                    <motion.button
+                      type="button"
+                      whileTap={{ scale: 0.9 }}
+                      onClick={handleIncomeFormCancelling}
+                      className="text-base px-4 py-2 bg-black text-skyBlue rounded-sm cursor-pointer max-large:w-full"
+                    >
+                      Cancel
+                    </motion.button>
+                    <motion.button
+                      type="submit"
+                      whileTap={{ scale: 0.9 }}
+                      disabled={loading}
+                      className={` ${
+                        loading
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-skyBlue  "
+                      } text-base  px-4 py-2 rounded-sm text-richBlack max-large:w-full`}
+                    >
+                      {loading ? <Loader bgBlack="bg-richBlack" /> : " Submit"}
+                    </motion.button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex gap-6 max-large:flex-col w-full">
+                    <div className={` w-full`}>
+                      <select
+                        className="px-4 py-2 rounded-sm border-2 bg-richBlack border-textColor w-full"
+                        {...register("currency")}
+                      >
+                        <option disabled value="">
+                          Select Currency
+                        </option>
+                        <option value="Rupee">Rupee</option>
+                        <option value="Euro">Euro</option>
+                        <option value="Dollar">Dollar</option>
+                      </select>
+                      {errors.currency && (
+                        <p className="text-red-500">
+                          {errors.currency.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="w-full">
+                      <input
+                        type="number"
+                        placeholder="Annual Income"
+                        className="px-4 py-2 rounded-sm border-2 border-textColor w-full"
+                        {...register("annualIncome")}
+                      />
+                      {errors.annualIncome && (
+                        <p className="text-red-500">
+                          {errors.annualIncome.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-6  max-large:flex-col max-sm:w-full">
+                    <motion.button
+                      type="button"
+                      whileTap={{ scale: 0.9 }}
+                      onClick={handleIncomeFormCancelling}
+                      className="text-base px-4 py-2 bg-black text-skyBlue rounded-sm cursor-pointer"
+                    >
+                      Cancel
+                    </motion.button>
+                    <motion.button
+                      type="submit"
+                      whileTap={{ scale: 0.9 }}
+                      disabled={loading}
+                      className={` ${
+                        loading
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-skyBlue  "
+                      } text-base  px-4 py-2 rounded-sm text-richBlack`}
+                    >
+                      {loading ? <Loader bgBlack="bg-richBlack" /> : " Submit"}
+                    </motion.button>
+                  </div>
+                </>
+              )}
             </motion.form>
           </>
-        ) : null}
+        )}
       </AnimatePresence>
     </div>
   );

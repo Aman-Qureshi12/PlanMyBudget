@@ -24,8 +24,8 @@ const Expenses = () => {
     update: false,
     delete: false,
     add: false,
-    errors: false,
   });
+  const [apiErrors, setApiErrors] = useState(false);
   const [loadingID, setLoadingID] = useState(null);
   const [loading, setLoading] = useState(false);
   const [expenseID, setExpenseID] = useState(null);
@@ -73,7 +73,6 @@ const Expenses = () => {
     setFilterByCategory(e.target.value);
   };
 
-  // Build unique categories case-insensitive
   const filterCategories = expenses
     ?.map((expense) => {
       return {
@@ -107,7 +106,7 @@ const Expenses = () => {
         return true;
       }
 
-      // 2️⃣ Only month filter
+      //  Only month filter
       if (
         filterByMonth &&
         Number(filterByMonth) !== 0 &&
@@ -116,7 +115,7 @@ const Expenses = () => {
         return monthNumber === Number(filterByMonth);
       }
 
-      // 3️⃣ Only category filter
+      //  Only category filter
       if (
         (!filterByMonth || Number(filterByMonth) === 0) &&
         filterByCategory &&
@@ -125,7 +124,7 @@ const Expenses = () => {
         return normalizedCategory === normalizedFilterCategory;
       }
 
-      // 4️⃣ Both filters applied
+      // Both filters applied
       if (
         filterByMonth &&
         Number(filterByMonth) !== 0 &&
@@ -158,9 +157,10 @@ const Expenses = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowModal({ update: false, delete: false, add: false, errors: false });
+      setApiErrors(false);
     }, 2000);
     return () => clearTimeout(timer);
-  }, [showModal.add, showModal.update, showModal.delete, showModal.errors]);
+  }, [showModal.add, showModal.update, showModal.delete, apiErrors]);
 
   // Deleting the Expense
   const handleDeleteExpense = (expenseID) => {
@@ -176,8 +176,7 @@ const Expenses = () => {
         dispatch(fetchingAllExpenses());
       })
       .catch(() => {
-        console.log("Something went wrong in thr delete");
-        triggerModal("errors");
+        setApiErrors(true);
       })
       .finally(() => setLoadingID(null));
   };
@@ -208,12 +207,11 @@ const Expenses = () => {
         },
         { withCredentials: true }
       );
-      setExpenseID(null); // exit edit mode
-      dispatch(fetchingAllExpenses()); // refresh list
+      setExpenseID(null);
+      dispatch(fetchingAllExpenses());
       triggerModal("update");
     } catch {
-      console.log("Something went wrong in thr delete");
-      triggerModal("errors");
+      setApiErrors(true);
     } finally {
       setLoading(false);
     }
@@ -227,7 +225,7 @@ const Expenses = () => {
       </div>
 
       {/* Expense Form  */}
-      <ExpenseForm triggerModal={triggerModal} />
+      <ExpenseForm triggerModal={triggerModal} setApiErrors={setApiErrors} />
       <div className="w-full flex max-small:flex-col justify-between items-center  gap-10  small:overflow-x-auto">
         <ExpenseChart />
         <ExpensePieChart />
@@ -269,7 +267,11 @@ const Expenses = () => {
             <Loader bgBlack="bg-palePink" />
           </motion.div>
         ) : (
-          <div className="overflow-x-auto mt-8">
+          <div
+            className={`${
+              expenseID ? "overflow-x-auto" : ""
+            }  mt-8 max-md:overflow-x-auto`}
+          >
             <table className="w-full max-md:min-w-[800px] text-lg mx-1">
               <tbody>
                 {filteredAndSortedExpenses && (
@@ -407,24 +409,24 @@ const Expenses = () => {
       </div>
       <Modal
         Message="Updated Successfully"
-        bgColor="palePink"
+        bgColor="bg-palePink"
         show={showModal.update}
       />
 
       <Modal
         Message="Deleted Successfully"
-        bgColor="palePink"
+        bgColor="bg-palePink"
         show={showModal.delete}
       />
       <Modal
         Message="Added Successfully"
-        bgColor="palePink"
+        bgColor="bg-palePink"
         show={showModal.add}
       />
       <Modal
-        Message="Something went wrong Try again later"
-        bgColor="PurPle"
-        show={showModal.errors}
+        Message="Something went wrong"
+        bgColor="bg-red-700"
+        show={apiErrors}
       />
     </div>
   );

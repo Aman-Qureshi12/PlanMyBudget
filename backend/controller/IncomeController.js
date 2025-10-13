@@ -97,7 +97,6 @@ export const updateIncomes = async (req, res) => {
 
     const newMonthlyIncome = Math.round(annualIncome / 12);
 
-    // Ensure the income belongs to the logged-in user
     const updateIncome = await IncomeModel.findOneAndUpdate(
       { _id: id, user: userID },
       {
@@ -107,7 +106,6 @@ export const updateIncomes = async (req, res) => {
         annualIncome,
         monthlyIncome: newMonthlyIncome,
       }
-      // { new: true }
     );
 
     if (!updateIncome) {

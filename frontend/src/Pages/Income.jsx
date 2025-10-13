@@ -21,6 +21,7 @@ const Income = () => {
     delete: false,
     add: false,
   });
+  const [apiErrors, setApiErrors] = useState(false);
   const [loadingID, setLoadingID] = useState(null);
   const [loading, setLoading] = useState(false);
   const [incomeID, setIncomeID] = useState(null);
@@ -63,9 +64,10 @@ const Income = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowModal({ update: false, delete: false, add: false });
+      setApiErrors(false);
     }, 2000);
     return () => clearTimeout(timer);
-  }, [showModal.add, showModal.update, showModal.delete]);
+  }, [showModal.add, showModal.update, showModal.delete, apiErrors]);
 
   // Deleting the Income
   const handleDeleteIncome = (incomeID) => {
@@ -81,7 +83,7 @@ const Income = () => {
         dispatch(fetchingIncome());
         triggerModal("delete");
       })
-      .catch(() => console.log("There was an error sending the ID"))
+      .catch(() => setApiErrors(true))
       .finally(() => setLoadingID(null));
   };
 
@@ -113,12 +115,12 @@ const Income = () => {
         { withCredentials: true }
       );
 
-      setIncomeID(null); // exit edit mode
+      setIncomeID(null);
       dispatch(fetchingIncomeDetails());
       dispatch(fetchingIncome());
       triggerModal("update");
-    } catch (error) {
-      console.error("Error updating income", error);
+    } catch {
+      setApiErrors(true);
     } finally {
       setLoading(false);
     }
@@ -168,7 +170,11 @@ const Income = () => {
       </div>
 
       {/* Income Form  */}
-      <IncomeForm triggerModal={triggerModal} Currency={currency} />
+      <IncomeForm
+        triggerModal={triggerModal}
+        Currency={currency}
+        setApiErrors={setApiErrors}
+      />
       <div className="w-full bg-richBlack">
         <h1 className="text-3xl font-inter text-skyBlue pt-10">All Incomes</h1>
         {isLoading || showTempLoader ? (
@@ -182,8 +188,12 @@ const Income = () => {
             <Loader bgBlack="bg-skyBlue" />
           </motion.div>
         ) : (
-          <div className="overflow-x-auto mt-8">
-            <table className=" w-full max-md:min-w-[800px] text-lg mx-1 text-skyBlue">
+          <div
+            className={`${
+              incomeID ? "overflow-x-auto" : ""
+            }  mt-8 max-md:overflow-x-auto`}
+          >
+            <table className=" w-full max-md:min-w-[800px] text-lg mx-1  text-skyBlue">
               <tbody>
                 {incomeDetails?.map((incomeDetail, index) => (
                   <>
@@ -318,18 +328,23 @@ const Income = () => {
       </div>
       <Modal
         Message="Updated Successfully"
-        bgColor="skyBlue"
+        bgColor="bg-skyBlue"
         show={showModal.update}
       />
       <Modal
         Message="Deleted Successfully"
-        bgColor="skyBlue"
+        bgColor="bg-skyBlue"
         show={showModal.delete}
       />
       <Modal
         Message="Added Successfully"
-        bgColor="skyBlue"
+        bgColor="bg-skyBlue"
         show={showModal.add}
+      />
+      <Modal
+        Message="Something went wrong"
+        bgColor="bg-red-700"
+        show={apiErrors}
       />
     </div>
   );

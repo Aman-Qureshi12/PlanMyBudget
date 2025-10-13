@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux";
 import { fetchInvestmentDetails } from "../../features/investment/InvestmentSlice";
 import Loader from "../../Components/Loader";
 
-const InvestmentForm = ({ triggerModal }) => {
+const InvestmentForm = ({ triggerModal, setApiErrors }) => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const ref = useRef(null);
@@ -53,9 +53,7 @@ const InvestmentForm = ({ triggerModal }) => {
         triggerModal("add");
         dispatch(fetchInvestmentDetails());
       })
-      .catch((err) =>
-        console.log("there was an error sending the form data", err)
-      )
+      .catch(() => setApiErrors(true))
       .finally(() => setLoading(false));
   };
 

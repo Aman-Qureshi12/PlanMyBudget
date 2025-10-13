@@ -28,7 +28,6 @@ export const addInvestment = async (req, res) => {
 };
 
 // For getting all the investments
-
 export const getAllInvestments = async (req, res) => {
   try {
     const investments = await InvestmentModel.find({

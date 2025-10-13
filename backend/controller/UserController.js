@@ -2,31 +2,24 @@ import UserModel from "../model/UserModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+// User Sign-In logic
 export const addUsers = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if user already exists
     const userExists = await UserModel.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "The user already exists" });
     }
 
-    // Hash the password
     const hash = await bcrypt.hash(password, 10);
 
-    // Save the user with Mongoose
     const newUser = await UserModel.create({
       email,
       password: hash,
     });
 
-    // Create JWT token with the new user’s Mongo _id
-    const token = jwt.sign(
-      { id: newUser._id }, // ✅ _id from Mongoose doc
-      process.env.JWT_SECRET
-      // { expiresIn: "1h" }
-    );
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
 
     // Set cookie
     res.cookie("token", token, {
@@ -46,6 +39,7 @@ export const addUsers = async (req, res) => {
   }
 };
 
+// User Log-in Logic
 export const userLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -66,10 +60,9 @@ export const userLogin = async (req, res) => {
         id: userExists._id,
       },
       process.env.JWT_SECRET
-
-      // { expiresIn: "1hr" }
     );
 
+    // set cookie
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "lax",
@@ -87,9 +80,9 @@ export const userLogin = async (req, res) => {
   }
 };
 
+// Logging out the user ( Clearing the token cookie )
 export const logoutUser = (req, res) => {
   try {
-    // Clear the token cookie
     res.clearCookie("token", {
       httpOnly: true,
       sameSite: "lax",

@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux";
 import { fetchingAllExpenses } from "../../features/expense/ExpenseSlice";
 import Loader from "../../Components/Loader";
 
-const ExpenseForm = ({ triggerModal }) => {
+const ExpenseForm = ({ triggerModal, setApiErrors }) => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
@@ -59,7 +59,7 @@ const ExpenseForm = ({ triggerModal }) => {
         dispatch(fetchingAllExpenses());
         triggerModal("add");
       })
-      .catch((err) => console.log("There was an error sending the data ", err))
+      .catch(() => setApiErrors(true))
       .finally(() => setLoading(false));
   };
 

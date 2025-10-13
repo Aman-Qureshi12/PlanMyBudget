@@ -10,7 +10,7 @@ const Modal = ({ Message, bgColor, show }) => {
           animate={{ opacity: 1, y: 0 }} // Slide up + fade in
           exit={{ opacity: 0, y: 50 }} // Slide down + fade out
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className={`bg-${bgColor} text-richBlack fixed bottom-4 right-4 p-4 rounded z-10 shadow`}
+          className={`${bgColor} text-richBlack fixed bottom-4 right-4 p-4 rounded z-10 shadow`}
         >
           <p>{Message}</p>
         </motion.div>

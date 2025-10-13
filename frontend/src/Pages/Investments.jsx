@@ -25,6 +25,7 @@ const Investments = () => {
     delete: false,
     add: false,
   });
+  const [apiErrors, setApiErrors] = useState(false);
   const [loadingID, setLoadingID] = useState(null);
   const [loading, setLoading] = useState(false);
   const [investmentID, setInvestmentID] = useState("");
@@ -34,7 +35,7 @@ const Investments = () => {
   const [filterByCategory, setFilterByCategory] = useState("");
   const [showTempLoader, setShowTempLoader] = useState(false);
 
-  useCheckUser();
+  useCheckUser(); // Checking if the user is signed in or not
 
   const dispatch = useDispatch();
   const investmentDetails = useSelector(
@@ -48,6 +49,7 @@ const Investments = () => {
     setTimeout(() => setShowTempLoader(false), 1000);
   };
 
+  // Currency check
   const currencySymbols = {
     Rupee: "₹",
     Dollar: "$",
@@ -97,7 +99,7 @@ const Investments = () => {
         investment.category.charAt(0).toUpperCase() +
         investment.category.slice(1).toLowerCase();
 
-      // 1️⃣ No filters → show all
+      //  No filters → show all
       if (
         (!filterByMonth || Number(filterByMonth) === 0) &&
         (!filterByCategory || filterByCategory.toLowerCase() === "all")
@@ -105,7 +107,7 @@ const Investments = () => {
         return true;
       }
 
-      // 2️⃣ Only month filter
+      //  Only month filter
       if (
         filterByMonth &&
         Number(filterByMonth) !== 0 &&
@@ -114,7 +116,7 @@ const Investments = () => {
         return monthNumber === Number(filterByMonth);
       }
 
-      // 3️⃣ Only category filter
+      //  Only category filter
       if (
         (!filterByMonth || Number(filterByMonth) === 0) &&
         filterByCategory &&
@@ -123,7 +125,7 @@ const Investments = () => {
         return normalizedCategory === normalizedFilterCategory;
       }
 
-      // 4️⃣ Both filters applied
+      //  Both filters applied
       if (
         filterByMonth &&
         Number(filterByMonth) !== 0 &&
@@ -156,9 +158,10 @@ const Investments = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowModal({ update: false, delete: false, add: false });
+      setApiErrors(false);
     }, 2000);
     return () => clearTimeout(timer);
-  }, [showModal.add, showModal.update, showModal.delete]);
+  }, [showModal.add, showModal.update, showModal.delete, apiErrors]);
 
   // deleting Investments
   const handleDeleteInvestment = (id) => {
@@ -173,7 +176,7 @@ const Investments = () => {
         triggerModal("delete");
         dispatch(fetchInvestmentDetails());
       })
-      .catch((err) => console.log("There was an error sending the id ", err))
+      .catch(() => setApiErrors(true))
       .finally(() => setLoadingID(null));
   };
 
@@ -203,7 +206,7 @@ const Investments = () => {
         triggerModal("update");
         dispatch(fetchInvestmentDetails());
       })
-      .catch(() => console.log("There was an error updating the data"))
+      .catch(() => setApiErrors(true))
       .finally(() => setLoading(false));
     setInvestmentID(null);
   };
@@ -215,7 +218,7 @@ const Investments = () => {
         <CurrentBalanceCard seconds={0.4} direction={-100} />
       </div>
 
-      <InvestmentForm triggerModal={triggerModal} />
+      <InvestmentForm triggerModal={triggerModal} setApiErrors={setApiErrors} />
       <div className="w-full flex max-small:flex-col justify-between items-center  gap-10  small:overflow-x-auto">
         <InvestmentChart />
         <InvestmentPieChart />
@@ -257,7 +260,11 @@ const Investments = () => {
             <Loader bgBlack="bg-Purple" />
           </motion.div>
         ) : (
-          <div className="overflow-x-auto mt-8">
+          <div
+            className={`${
+              investmentID ? "overflow-x-auto" : ""
+            }  mt-8 max-md:overflow-x-auto`}
+          >
             <table className="w-full max-md:min-w-[800px] text-lg mx-1">
               <tbody>
                 {filteredAndSortedInvestments ? (
@@ -363,7 +370,7 @@ const Investments = () => {
                                     </span>{" "}
                                     {investment.investmentAmount}
                                   </td>
-                                  <td className=" px-4 py-2">
+                                  <td className=" px-4 py-2 ">
                                     <EditButton
                                       OnClick={() =>
                                         handleEditInvestmentData(
@@ -402,18 +409,23 @@ const Investments = () => {
       </div>
       <Modal
         Message="Updated Successfully"
-        bgColor="Purple"
+        bgColor="bg-Purple"
         show={showModal.update}
       />
       <Modal
         Message="Deleted Successfully"
-        bgColor="Purple"
+        bgColor="bg-Purple"
         show={showModal.delete}
       />
       <Modal
         Message="Added Successfully"
-        bgColor="Purple"
+        bgColor="bg-Purple"
         show={showModal.add}
+      />
+      <Modal
+        Message="Something went wrong"
+        bgColor="bg-red-700"
+        show={apiErrors}
       />
     </div>
   );

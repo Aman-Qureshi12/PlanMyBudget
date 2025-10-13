@@ -121,7 +121,8 @@ function NavBar() {
                 </li>
               ))}
             </ul>
-            <button
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={() => {
                 navigate("/signin");
                 setShowNavBar(false);
@@ -129,7 +130,7 @@ function NavBar() {
               className="bg-textColor text-richBlack rounded-sm px-4 py-2 cursor-pointer hover:scale-105 transition-transform"
             >
               Sign In
-            </button>
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
