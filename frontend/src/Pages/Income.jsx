@@ -74,7 +74,7 @@ const Income = () => {
     setLoadingID(incomeID);
     triggerLoader();
     axios
-      .delete("http://localhost:8000/incomes", {
+      .delete("https://planmybudget-backend.onrender.com/incomes", {
         data: { id: incomeID },
         withCredentials: true,
       })
@@ -107,7 +107,7 @@ const Income = () => {
     triggerLoader();
     try {
       await axios.put(
-        `http://localhost:8000/incomes`,
+        `https://planmybudget-backend.onrender.com/incomes`,
         {
           id: incomeID,
           ...incomeData,

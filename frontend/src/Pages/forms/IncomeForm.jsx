@@ -84,7 +84,7 @@ const IncomeForm = ({ triggerModal, Currency, setApiErrors }) => {
       monthlyIncome,
     };
     axios
-      .post("http://localhost:8000/incomes", incomeData, {
+      .post("https://planmybudget-backend.onrender.com/incomes", incomeData, {
         withCredentials: true,
       })
       .then(() => {

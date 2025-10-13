@@ -12,9 +12,12 @@ const initialState = {
 export const fetchInvestmentDetails = createAsyncThunk(
   "fetchInvestmentDetails",
   async () => {
-    const response = await axios.get("http://localhost:8000/investments", {
-      withCredentials: true,
-    });
+    const response = await axios.get(
+      "https://planmybudget-backend.onrender.com/investments",
+      {
+        withCredentials: true,
+      }
+    );
     const formattedInvestments = response.data.investments.map(
       (investment) => ({
         ...investment,
@@ -28,9 +31,12 @@ export const fetchInvestmentDetails = createAsyncThunk(
 export const fetchInvestmentTotal = createAsyncThunk(
   "fetchInvestmentTotal",
   async () => {
-    const response = await axios.get("http://localhost:8000/totalInvestments", {
-      withCredentials: true,
-    });
+    const response = await axios.get(
+      "https://planmybudget-backend.onrender.com/totalInvestments",
+      {
+        withCredentials: true,
+      }
+    );
     return response.data.sumOfAllInvestments;
   }
 );

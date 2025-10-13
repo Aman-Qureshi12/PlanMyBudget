@@ -46,9 +46,13 @@ const InvestmentForm = ({ triggerModal, setApiErrors }) => {
       investmentAmount: data.investmentAmount,
     };
     axios
-      .post("http://localhost:8000/investments", investmentFormData, {
-        withCredentials: true,
-      })
+      .post(
+        "https://planmybudget-backend.onrender.com/investments",
+        investmentFormData,
+        {
+          withCredentials: true,
+        }
+      )
       .then(() => {
         triggerModal("add");
         dispatch(fetchInvestmentDetails());

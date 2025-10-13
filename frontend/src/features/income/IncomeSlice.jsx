@@ -15,26 +15,35 @@ const initialState = {
 export const fetchingIncomeDetails = createAsyncThunk(
   "fetchingIncomeDetails",
   async () => {
-    const response = await axios.get("http://localhost:8000/incomeDetails", {
-      withCredentials: true,
-    });
+    const response = await axios.get(
+      "https://planmybudget-backend.onrender.com/incomeDetails",
+      {
+        withCredentials: true,
+      }
+    );
     return response.data.incomeDetails;
   }
 );
 
 export const fetchingIncome = createAsyncThunk("fetchingIncome", async () => {
-  const response = await axios.get("http://localhost:8000/incomes", {
-    withCredentials: true,
-  });
+  const response = await axios.get(
+    "https://planmybudget-backend.onrender.com/incomes",
+    {
+      withCredentials: true,
+    }
+  );
   return response.data.Incomes;
 });
 
 export const fetchingCurrency = createAsyncThunk(
   "fetchingCurrency",
   async () => {
-    const response = await axios.get("http://localhost:8000/currency", {
-      withCredentials: true,
-    });
+    const response = await axios.get(
+      "https://planmybudget-backend.onrender.com/currency",
+      {
+        withCredentials: true,
+      }
+    );
     return response.data.Currency;
   }
 );

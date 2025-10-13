@@ -19,7 +19,8 @@ app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
 ConnectDB();
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+// app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: "https://plan-budget.vercel.app", credentials: true }));
 
 app.use("/", UserRoutes);
 app.use("/", userToken, IncomeRoutes);

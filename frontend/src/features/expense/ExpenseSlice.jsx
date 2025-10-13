@@ -14,9 +14,12 @@ const initialState = {
 export const fetchExpenseTotal = createAsyncThunk(
   "fetchExpenseTotal",
   async () => {
-    const response = await axios.get("http://localhost:8000/totalIncome", {
-      withCredentials: true,
-    });
+    const response = await axios.get(
+      "https://planmybudget-backend.onrender.com/totalIncome",
+      {
+        withCredentials: true,
+      }
+    );
     return response.data.expenseTotal;
   }
 );
@@ -24,9 +27,12 @@ export const fetchExpenseTotal = createAsyncThunk(
 export const fetchingAllExpenses = createAsyncThunk(
   "fetchingAllExpenses",
   async () => {
-    const response = await axios.get("http://localhost:8000/expenses", {
-      withCredentials: true,
-    });
+    const response = await axios.get(
+      "https://planmybudget-backend.onrender.com/expenses",
+      {
+        withCredentials: true,
+      }
+    );
 
     // Format each expense date to YYYY-MM-DD
     const formattedExpenses = response.data.allExpenses.map((expense) => ({

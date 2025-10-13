@@ -51,7 +51,7 @@ const ExpenseForm = ({ triggerModal, setApiErrors }) => {
       expenseAmount: data.expenseAmount,
     };
     axios
-      .post("http://localhost:8000/expenses", ExpenseData, {
+      .post("https://planmybudget-backend.onrender.com/expenses", ExpenseData, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       })

@@ -168,7 +168,7 @@ const Investments = () => {
     setLoadingID(id);
     triggerLoader();
     axios
-      .delete("http://localhost:8000/investments", {
+      .delete("https://planmybudget-backend.onrender.com/investments", {
         data: { id: id },
         withCredentials: true,
       })
@@ -198,7 +198,7 @@ const Investments = () => {
     triggerLoader();
     await axios
       .put(
-        "http://localhost:8000/investments",
+        "https://planmybudget-backend.onrender.com/investments",
         { id: investmentID, ...investmentData },
         { withCredentials: true }
       )

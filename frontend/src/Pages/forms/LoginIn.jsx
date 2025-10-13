@@ -36,7 +36,9 @@ const LoginIn = () => {
       password: data.password,
     };
     axios
-      .post("http://localhost:8000/login", formData, { withCredentials: true })
+      .post("https://planmybudget-backend.onrender.com/login", formData, {
+        withCredentials: true,
+      })
       .then(() => navigate("/expenses"))
       .catch((err) => setError(err.response.data.message))
       .finally(() => setLoading(false));
