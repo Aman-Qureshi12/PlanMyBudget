@@ -24,8 +24,11 @@ export const addUsers = async (req, res) => {
     // Set cookie
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "lax",
-      secure: false, // set to true in production with HTTPS
+      sameSite: "None", // for production
+      secure: true, // for production
+
+      // sameSite: "lax",  // for local development
+      // secure: false,  // for local development
     });
 
     res.status(200).json({
@@ -65,8 +68,11 @@ export const userLogin = async (req, res) => {
     // set cookie
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "lax",
-      secure: false,
+      sameSite: "None", // for production
+      secure: true, // for production
+
+      // sameSite: "lax",  // for local development
+      // secure: false,  // for local development
     });
 
     res.status(200).json({
