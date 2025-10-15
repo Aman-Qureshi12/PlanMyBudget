@@ -6,18 +6,22 @@ import CloseButton from "../Components/CloseButton";
 
 const SideBar = () => {
   const [showSideBar, setShowSideBar] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
+    setLoading(true);
     try {
       await axios.post(
-        "http://localhost:8000/logout",
+        "https://planmybudget-backend.onrender.com/logout",
         {},
         { withCredentials: true }
       );
-      navigate("/login"); // Redirect to login
+      navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,19 +51,16 @@ const SideBar = () => {
           {showSideBar && (
             <motion.div
               key="sidebar"
-              initial={{ x: -250, opacity: 0 }} // when appearing
-              animate={{ x: 0, opacity: 1 }} // while visible
-              exit={{ x: -250, opacity: 0 }} // when leaving
+              initial={{ x: -250, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -250, opacity: 0 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
               className="fixed z-50 top-0 left-0 w-[250px] h-[100vh]  bg-black text-textColor flex flex-col justify-between font-roboto "
             >
               <div className="text-sm text-gray-400 text-left pt-3 pl-3">
                 <CloseButton OnClick={() => setShowSideBar(false)} />
               </div>
-              {/* <button
-                onClick={() => setShowSideBar(false)}
-                
-              ></button> */}
+
               <div className="">
                 <h1 className="text-center text-2xl">Dashboard</h1>
                 <div className="flex flex-col gap-10 px-5 text-lg pt-16">
@@ -110,7 +111,7 @@ const SideBar = () => {
                   onClick={handleLogout}
                   className="cursor-pointer relative"
                 >
-                  Logout
+                  {loading ? "Please wait..." : "Logout"}
                 </button>
               </div>
             </motion.div>
@@ -118,7 +119,7 @@ const SideBar = () => {
         </AnimatePresence>
       </div>
 
-      {/* Desktop sidebar (always visible) */}
+      {/* Desktop sidebar  */}
       <div className="hidden lg:flex fixed z-40  w-[20%] h-[100vh] flex-col justify-between bg-black text-textColor pt-14 px-10 font-roboto 2xl:w-[300px]">
         <div>
           <h1 className="text-center text-2xl">Dashboard</h1>
@@ -167,7 +168,7 @@ const SideBar = () => {
         </div>
         <div className="pb-8 flex justify-between items-center ">
           <button onClick={handleLogout} className="cursor-pointer relative ">
-            Logout
+            {loading ? "Please wait..." : "Logout"}
           </button>
         </div>
       </div>

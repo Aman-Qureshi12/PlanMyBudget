@@ -1,7 +1,3 @@
-// import Facebook from "";
-// import Instagram from "";
-// import Twitter from "";
-
 const Footer = () => {
   return (
     <footer className="  text-textColor pt-10 bg-richBlack ">

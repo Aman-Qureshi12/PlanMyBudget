@@ -15,9 +15,7 @@ function NavBar() {
 
   return (
     <>
-      {/* Top Navbar */}
       <nav className="flex justify-between items-center fixed w-full z-50 bg-richBlack text-textColor py-4 max-sm:px-5 max-md:px-10 md:px-20 shadow-lg min-[2000px]:mx-auto min-[2000px]:max-w-[100rem]">
-        {/* Logo */}
         <div className="">
           <h1 className="text-5xl italic">FinTrack</h1>
         </div>
@@ -96,7 +94,7 @@ function NavBar() {
         </button>
       </nav>
 
-      {/* Mobile Dropdown Menu with Animation */}
+      {/* Mobile Dropdown Menu */}
       <AnimatePresence>
         {showNavBar && (
           <motion.div
