@@ -1,6 +1,6 @@
-import Facebook from "/public/socialMedia/darkfacebook.svg";
-import Instagram from "/public/socialMedia/darkinstagram.svg";
-import Twitter from "/public/socialMedia/darktwitter.svg";
+// import Facebook from "";
+// import Instagram from "";
+// import Twitter from "";
 
 const Footer = () => {
   return (
@@ -16,27 +16,27 @@ const Footer = () => {
           <div className="flex-grow h-0.5 bg-textColor mr-[13%]"></div>
         </div>
         <div className="flex gap-6 justify-center items-center mt-8 ">
-          <div className=" flex justify-center items-center  w-10 h-10 smallest:w-12 smallest:h-12 bg-Purple hover:bg-lightGreen  rounded-full cursor-pointer">
+          <div className=" flex justify-center items-center  w-10 h-10 smallest:w-12 smallest:h-12 bg-black hover:bg-lightGreen  rounded-full cursor-pointer">
             <img
               width={30}
               className="h-auto"
-              src={Instagram}
+              src="/socialMedia/darkinstagram.svg"
               alt="Loading Img"
             />
           </div>
-          <div className="flex justify-center items-center w-10 h-10 smallest:w-12 smallest:h-12 bg-Purple hover:bg-lightGreen  rounded-full cursor-pointer">
+          <div className="flex justify-center items-center w-10 h-10 smallest:w-12 smallest:h-12 bg-black hover:bg-lightGreen  rounded-full cursor-pointer">
             <img
               width={30}
               className="h-auto"
-              src={Facebook}
+              src="/socialMedia/darkfacebook.svg"
               alt="Loading Img"
             />
           </div>
-          <div className=" flex justify-center items-center  w-10 h-10 smallest:w-12 smallest:h-12 bg-Purple hover:bg-lightGreen  rounded-full cursor-pointer">
+          <div className=" flex justify-center items-center  w-10 h-10 smallest:w-12 smallest:h-12 bg-black hover:bg-lightGreen  rounded-full cursor-pointer">
             <img
               width={30}
               className="h-auto"
-              src={Twitter}
+              src="/socialMedia/darktwitter.svg"
               alt="Loading Img"
             />
           </div>

@@ -38,7 +38,7 @@ const SignIn = () => {
       .post("https://planmybudget-backend.onrender.com/signin", formData, {
         withCredentials: true,
       })
-      .then(() => navigate("/expenses"))
+      .then(() => navigate("/incomes"))
       .catch((err) => setError(err.response.data.message))
       .finally(() => setLoading(false));
   };

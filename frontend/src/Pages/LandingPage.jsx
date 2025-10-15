@@ -1,11 +1,4 @@
 import { useState } from "react";
-import HeroImage from "/public/dashboardImage.png";
-import Alex from "/public/reviewer/Alex.png";
-import David from "/public/reviewer/David.png";
-import Maria from "/public/reviewer/Maria.png";
-import Sam from "/public/reviewer/Sam.png";
-import Sarah from "/public/reviewer/Sarah.png";
-import quote from "/public/quote.png";
 import NavBar from "../Layout/NavBar";
 import Footer from "../Layout/Footer";
 import { motion } from "motion/react";
@@ -17,35 +10,35 @@ const LandingPage = () => {
   const reviews = [
     {
       id: 1,
-      img: Alex,
+      img: "/reviewer/Alex.png",
       name: "Alex",
       review:
         "FinTrack has completely changed the way I manage my money. Tracking income from multiple clients and keeping my expenses in check is now so easy!",
     },
     {
       id: 2,
-      img: Maria,
+      img: "/reviewer/Maria.png",
       name: "Maria",
       review:
         "I love how everything is in one place—expenses, income, and even my insurance policies. The renewal reminders are a lifesaver!",
     },
     {
       id: 3,
-      img: David,
+      img: "/reviewer/David.png",
       name: "David ",
       review:
         "The reports and charts give me a clear picture of where my money goes. FinTrack has helped me cut unnecessary spending and save more.",
     },
     {
       id: 4,
-      img: Sarah,
+      img: "/reviewer/Sarah.png",
       name: "Sarah",
       review:
         "As a student, budgeting was always tough. With FinTrack, I can set limits and actually stick to them. The dashboard is super easy to use.",
     },
     {
       id: 5,
-      img: Sam,
+      img: "/reviewer/Sam.png",
       name: "Sam",
       review:
         "Managing family expenses used to be messy, but FinTrack makes it simple. I can track household spending and keep all our insurance details organized.",
@@ -90,7 +83,7 @@ const LandingPage = () => {
           viewport={{ once: true }}
         >
           <img
-            src={HeroImage}
+            src="/dashboardImage.png"
             alt="DashBoard"
             className="rounded-sm lg:w-[80%] shadow-2xl shadow-textColor"
           />
@@ -128,7 +121,7 @@ const LandingPage = () => {
       {/* Why Choose Us Section */}
       <section
         id="choose-us"
-        className="pt-36 max-sm:px-5 max-md:px-10 md:px-20 flex flex-col justify-center"
+        className="pt-36 max-sm:px-5 max-md:px-10 md:px-20 flex flex-col justify-center overflow-hidden"
       >
         <motion.h1
           className="text-3xl text-center font-inter"
@@ -140,7 +133,7 @@ const LandingPage = () => {
           Why Choose Us
         </motion.h1>
 
-        <div className="max-lg:flex  max-lg:overflow-x-auto gap-5 ">
+        <div className="max-lg:flex  max-lg:overflow-x-auto gap-5 overflow-hidden">
           <motion.div
             className="flex  max-lg:gap-5 lg:justify-between pt-10 font-roboto min-h-[190px]"
             initial={{ opacity: 0, y: 80 }}
@@ -151,7 +144,7 @@ const LandingPage = () => {
             <div className="bg-textColor text-richBlack rounded-xs px-4 py-4 w-sm">
               <h3 className="text-xl">All-in-One Management</h3>
               <p className="max-w-md pt-3">
-                Track income, expenses, and insurance together in a single,
+                Track income, expenses, and investments together in a single,
                 easy-to-use platform.
               </p>
             </div>
@@ -202,9 +195,10 @@ const LandingPage = () => {
               </p>
             </div>
             <div className="bg-textColor text-richBlack rounded-xs px-4 py-4 w-sm">
-              <h3 className="text-xl">Insurance Renewal Reminders.</h3>
+              <h3 className="text-xl">Investment Overview</h3>
               <p className="max-w-md pt-3">
-                Never miss a renewal with timely alerts for your policies.
+                Easily monitor your investment performance and stay informed
+                about your overall financial growth.
               </p>
             </div>
           </motion.div>
@@ -240,7 +234,11 @@ const LandingPage = () => {
                 className="rounded-md border border-textColor px-10 py-8 max-w-5xl md:max-w-full"
               >
                 <div className="mb-4 flex justify-center">
-                  <img src={quote} alt="quote" className="h-auto w-10 sm:w-8" />
+                  <img
+                    src="/quote.png"
+                    alt="quote"
+                    className="h-auto w-10 sm:w-8"
+                  />
                 </div>
 
                 <motion.div
